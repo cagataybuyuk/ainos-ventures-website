@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded',()=>{
+  const isTr=document.documentElement.lang==='tr';
   const year=document.querySelector('[data-current-year]');
   if(year) year.textContent=new Date().getFullYear();
 
@@ -16,6 +17,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     .focus-title{font-size:clamp(28px,2.5vw,38px);line-height:1.02;font-weight:500;margin:0;letter-spacing:-.035em}
     .person-link{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);width:max-content;border-bottom:1px solid var(--line-strong);padding-bottom:3px}
     .person-link:hover{color:var(--ink)}
+    .skip-link{position:fixed;left:16px;top:12px;z-index:9999;padding:10px 14px;border-radius:999px;background:var(--ink);color:#fff;font-size:13px;transform:translateY(-160%);transition:transform .16s ease}
+    .skip-link:focus{transform:translateY(0)}
     .mobile-menu-toggle,.mobile-menu{display:none}
     .mobile-menu-toggle,.lang-link,.btn{touch-action:manipulation}
 
@@ -82,16 +85,35 @@ document.addEventListener('DOMContentLoaded',()=>{
       h1{font-size:43px}
       .actions{gap:9px}
     }
+
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      .reveal{transition:none!important;transform:none!important}
+      .btn,.nav-links a:after,.mobile-menu-toggle span,.mobile-menu-toggle span:before,.mobile-menu-toggle span:after{transition:none!important}
+    }
   `;
   document.head.appendChild(runtimeStyle);
+
+  const main=document.querySelector('main');
+  if(main){
+    if(!main.id) main.id='main-content';
+    if(!document.querySelector('.skip-link')){
+      const skip=document.createElement('a');
+      skip.className='skip-link';
+      skip.href='#main-content';
+      skip.textContent=isTr?'Ana içeriğe geç':'Skip to main content';
+      document.body.insertBefore(skip,document.body.firstChild);
+    }
+  }
 
   document.querySelectorAll('.brand .mark').forEach(mark=>{
     mark.innerHTML='<img class="brand-mark-img" src="/assets/images/ainos-monogram.svg" alt="">';
   });
 
-  document.querySelectorAll('a[href="mailto:info@ainosventures.com"]').forEach(link=>{
+  document.querySelectorAll('a[href="mailto:info@ainosventures.com"],a[href="mailto:contact@ainosventures.com"]').forEach(link=>{
     link.href='mailto:contact@ainosventures.com';
     link.textContent='contact@ainosventures.com';
+    link.setAttribute('aria-label',isTr?'Ainos Ventures ile e-posta üzerinden iletişime geç':'Email Ainos Ventures');
   });
 
   const linkedinProfiles={
@@ -108,6 +130,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     link.target='_blank';
     link.rel='noopener noreferrer';
     link.textContent='LinkedIn ↗';
+    link.setAttribute('aria-label',`${name} LinkedIn${isTr?' profilini yeni sekmede aç':' profile, opens in a new tab'}`);
     card.appendChild(link);
   });
 
@@ -115,8 +138,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   const navInner=document.querySelector('.nav-inner');
   const desktopLinks=document.querySelector('.nav-links');
   const langLink=document.querySelector('.lang-link');
+  if(langLink) langLink.setAttribute('aria-label',isTr?'Switch to English':'Türkçeye geç');
+
   if(nav&&navInner&&desktopLinks&&langLink){
-    const isTr=document.documentElement.lang==='tr';
     const openLabel=isTr?'Navigasyonu aç':'Open navigation';
     const closeLabel=isTr?'Navigasyonu kapat':'Close navigation';
 
@@ -155,6 +179,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       menu.classList.add('is-open');
       toggle.setAttribute('aria-expanded','true');
       toggle.setAttribute('aria-label',closeLabel);
+      inner.querySelector('a')?.focus();
     };
 
     toggle.addEventListener('click',()=>{
@@ -165,6 +190,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     inner.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>closeMenu()));
     document.addEventListener('keydown',event=>{
       if(event.key==='Escape') closeMenu(true);
+      if(event.key==='Tab'&&!menu.hidden){
+        const focusables=[toggle,...inner.querySelectorAll('a'),langLink].filter(el=>!el.hasAttribute('disabled'));
+        const first=focusables[0];
+        const last=focusables[focusables.length-1];
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+      }
     });
     document.addEventListener('click',event=>{
       if(!menu.hidden&&!nav.contains(event.target)) closeMenu();
