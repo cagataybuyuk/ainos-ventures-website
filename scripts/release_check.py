@@ -42,10 +42,20 @@ else:
     if "noindex" not in (staging_map.get("X-Robots-Tag") or "").lower():
         ERRORS.append("Staging host must send X-Robots-Tag noindex")
 
-    asset_rule = next((h for h in headers if h.get("source") == "/assets/(.*)"), None)
-    asset_map = {x.get("key"): x.get("value") for x in (asset_rule or {}).get("headers", [])}
-    if "max-age" not in (asset_map.get("Cache-Control") or ""):
-        ERRORS.append("Static assets must have an explicit cache policy")
+    cache_sources = ("/assets/js/(.*)", "/assets/css/(.*)", "/assets/images/(.*)")
+    for source in cache_sources:
+        rule = next((h for h in headers if h.get("source") == source), None)
+        rule_map = {x.get("key"): x.get("value") for x in (rule or {}).get("headers", [])}
+        cache_control = rule_map.get("Cache-Control") or ""
+        if "max-age" not in cache_control:
+            ERRORS.append(f"{source} must have an explicit cache policy")
+
+    for source in ("/assets/js/(.*)", "/assets/css/(.*)"):
+        rule = next((h for h in headers if h.get("source") == source), None)
+        rule_map = {x.get("key"): x.get("value") for x in (rule or {}).get("headers", [])}
+        cache_control = (rule_map.get("Cache-Control") or "").lower()
+        if "max-age=0" not in cache_control or "must-revalidate" not in cache_control:
+            ERRORS.append(f"{source} should revalidate during active launch to avoid stale releases")
 
 for lang in ("en", "tr"):
     page = ROOT / lang / "index.html"
@@ -74,4 +84,4 @@ if ERRORS:
     sys.exit(1)
 
 print("RELEASE CHECK PASSED")
-print("Verified production redirect, canonical host, staging noindex, security headers, asset caching and 404 indexing policy.")
+print("Verified production redirect, canonical host, staging noindex, security headers, split asset caching and 404 indexing policy.")
