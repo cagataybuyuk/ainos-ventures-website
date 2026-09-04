@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://ainosventures.com/en/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ainosventures.com/en/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/" />
+  </url>
+  <url>
+    <loc>https://ainosventures.com/tr/</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ainosventures.com/en/" />
+  </url>
+</urlset>
