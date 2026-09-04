@@ -13,7 +13,8 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Baseline security headers
 - Branded 404 page
 - Official Ainos monogram favicon / navigation mark
-- Accessible mobile navigation
+- Accessible mobile navigation with keyboard focus management
+- Skip-to-content support and reduced-motion handling
 - Automated GitHub Actions site-quality checks
 
 ## Approved positioning / brand direction
@@ -22,7 +23,6 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Charcoal typography (`#1C1C1C` reference)
 - Minimal editorial visual language
 - Official vector logo package received
-- Business-card visual can remain an optional reference if exact print-layout matching is needed
 
 ## Milestone status
 - [x] Milestone 1 — Production shell
@@ -35,23 +35,28 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Public contact route confirmed; website uses `contact@ainosventures.com`
 - [x] Personal LinkedIn profiles received for both co-founders
 - [x] Official monogram applied to navigation and favicon
-- [x] CI validates official brand, contact and LinkedIn wiring
-- [ ] Cross-browser + mobile QA
-- [ ] Final launch QA
-- [ ] Connect custom domain `ainosventures.com`
+- [x] Headshot mapping confirmed: Nidan = photo 1; Tunca = photo 2
+- [x] Accessibility / keyboard-navigation code pass
+- [x] Custom domain connected: `ainosventures.com`; `www` redirects to apex
+- [ ] Visual responsive QA
+- [ ] Production launch QA
+- [ ] Final technical release checklist
 
-## Waiting on stakeholder inputs / decisions
-- [ ] Explicit mapping of the two supplied headshots to Tunca / Nidan before publishing them
+## Remaining stakeholder inputs / decisions
+- [ ] Add the supplied binary headshot assets to the repository so they can be published on the team cards
 - [ ] Final factual bio copy approval after LinkedIn/background review
 - [ ] Official Ainos Ventures company LinkedIn URL, if/when created
-- [ ] Social preview image based on final brand assets
+
+## Explicitly deferred
+- Social sharing / OG image
+- First Ainos Intelligence article or brief
+- Privacy / cookie setup until analytics and form setup are finalised
 
 `info@ainosventures.com` is also available as a secondary company inbox.
 
-These items do not block technical hardening or QA work.
-
-## Current staging
-`https://ainos-ventures-website.vercel.app/en/`
+## Current production / staging
+Production: `https://ainosventures.com/`
+Staging: `https://ainos-ventures-website.vercel.app/en/`
 
 ## Working method
 GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, brand wiring and 404 indexing rules on each push and pull request.
