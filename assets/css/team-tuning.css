@@ -1,0 +1,38 @@
+.team-grid-two{
+  width:100%;
+  max-width:1040px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+.team-grid-two + .network-note{
+  max-width:1040px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.person-photo[data-person='Nidan Akmanoğlu']{
+  object-position:center 25% !important;
+  transform:scale(1.28) !important;
+}
+
+.person:hover .person-photo[data-person='Nidan Akmanoğlu']{
+  transform:scale(1.295) !important;
+}
+
+@media(max-width:760px){
+  .team-grid-two{max-width:640px !important;}
+  .person-photo[data-person='Nidan Akmanoğlu']{
+    object-position:center 24% !important;
+    transform:scale(1.22) !important;
+  }
+  .person:hover .person-photo[data-person='Nidan Akmanoğlu']{
+    transform:scale(1.22) !important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .person:hover .person-photo[data-person='Nidan Akmanoğlu']{
+    transform:scale(1.28) !important;
+  }
+}
