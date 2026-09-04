@@ -7,11 +7,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     [id]{scroll-margin-top:96px}
     .hero-main,.hero-side,.cap,.work,.panel,.person,.insight-card>*{min-width:0}
     .team-grid-two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:900px}
+    .current-focus-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .focus-card{min-height:320px}
+    .focus-title{font-size:clamp(28px,2.5vw,38px);line-height:1.02;font-weight:500;margin:0;letter-spacing:-.035em}
     .mobile-menu-toggle,.mobile-menu{display:none}
     .mobile-menu-toggle,.lang-link,.btn{touch-action:manipulation}
 
     @media(max-width:1040px){
       .team-grid-two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:none}
+      .current-focus-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .hero-side{min-height:360px}
     }
 
@@ -31,7 +35,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
 
     @media(max-width:760px){
-      .team-grid-two{grid-template-columns:1fr}
+      .team-grid-two,.current-focus-grid{grid-template-columns:1fr}
+      .focus-card{min-height:280px}
       .side-fact{grid-template-columns:88px minmax(0,1fr)}
       .work-topline{flex-wrap:wrap}
       .work-status{margin-left:0}
@@ -50,6 +55,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       .side-fact{grid-template-columns:78px minmax(0,1fr);gap:10px}
       .cap,.panel,.person,.work{padding:22px}
       .work{min-height:340px}
+      .focus-card{min-height:250px}
       .work-topline{display:grid;justify-items:start}
       .work-status{white-space:normal}
       .work-metric{font-size:39px;margin-top:26px}
