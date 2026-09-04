@@ -36,6 +36,7 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Personal LinkedIn profiles received for both co-founders
 - [x] Official monogram applied to navigation and favicon
 - [x] Headshot mapping confirmed: Nidan = photo 1; Tunca = photo 2
+- [x] Founder headshots uploaded and published in responsive team cards
 - [x] Accessibility / keyboard-navigation code pass
 - [x] Custom domain connected: `ainosventures.com`; `www` redirects to apex
 - [ ] Visual responsive QA
@@ -43,7 +44,6 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [ ] Final technical release checklist
 
 ## Remaining stakeholder inputs / decisions
-- [ ] Add the supplied binary headshot assets to the repository so they can be published on the team cards
 - [ ] Final factual bio copy approval after LinkedIn/background review
 - [ ] Official Ainos Ventures company LinkedIn URL, if/when created
 
@@ -59,4 +59,4 @@ Production: `https://ainosventures.com/`
 Staging: `https://ainos-ventures-website.vercel.app/en/`
 
 ## Working method
-GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, accessibility wiring, brand/contact wiring and 404 indexing rules on each push and pull request.
+GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, accessibility wiring, brand/contact/team wiring and 404 indexing rules on each push and pull request.
