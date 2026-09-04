@@ -1,7 +1,5 @@
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
-import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +9,7 @@ PAGES = {
 }
 ERRORS = []
 WARNINGS = []
+
 
 class PageParser(HTMLParser):
     def __init__(self):
@@ -22,11 +21,22 @@ class PageParser(HTMLParser):
         self.canonical = None
         self.alternates = {}
         self.robots = None
+        self.meta = {}
+        self.og = {}
+        self.h1_count = 0
+        self.title_count = 0
+        self._in_title = False
+        self.title_text = ""
 
     def handle_starttag(self, tag, attrs):
         data = dict(attrs)
         if tag == "html":
             self.html_lang = data.get("lang")
+        if tag == "h1":
+            self.h1_count += 1
+        if tag == "title":
+            self.title_count += 1
+            self._in_title = True
         if "id" in data:
             self.ids.append(data["id"])
         if "href" in data:
@@ -42,8 +52,24 @@ class PageParser(HTMLParser):
             self.canonical = data.get("href")
         if tag == "link" and data.get("rel") == "alternate" and data.get("hreflang"):
             self.alternates[data["hreflang"]] = data.get("href")
-        if tag == "meta" and data.get("name") == "robots":
-            self.robots = data.get("content")
+        if tag == "meta":
+            name = data.get("name")
+            prop = data.get("property")
+            content = data.get("content")
+            if name:
+                self.meta[name.lower()] = content
+            if prop:
+                self.og[prop.lower()] = content
+            if name == "robots":
+                self.robots = content
+
+    def handle_endtag(self, tag):
+        if tag == "title":
+            self._in_title = False
+
+    def handle_data(self, data):
+        if self._in_title:
+            self.title_text += data
 
 
 def parse(path: Path):
@@ -51,43 +77,87 @@ def parse(path: Path):
     parser.feed(path.read_text(encoding="utf-8"))
     return parser
 
+
 for path, lang in PAGES.items():
+    rel = path.relative_to(ROOT)
     if not path.exists():
-        ERRORS.append(f"Missing required page: {path.relative_to(ROOT)}")
+        ERRORS.append(f"Missing required page: {rel}")
         continue
 
     text = path.read_text(encoding="utf-8")
     page = parse(path)
 
     if page.html_lang != lang:
-        ERRORS.append(f"{path.relative_to(ROOT)}: expected html lang={lang!r}, found {page.html_lang!r}")
+        ERRORS.append(f"{rel}: expected html lang={lang!r}, found {page.html_lang!r}")
+
+    if page.title_count != 1 or not page.title_text.strip():
+        ERRORS.append(f"{rel}: must contain exactly one non-empty <title>")
+
+    if page.h1_count != 1:
+        ERRORS.append(f"{rel}: expected exactly one h1, found {page.h1_count}")
+
+    for required_meta in ("description", "viewport"):
+        if not page.meta.get(required_meta):
+            ERRORS.append(f"{rel}: missing meta {required_meta}")
 
     expected_canonical = f"https://ainosventures.com/{lang}/"
     if page.canonical != expected_canonical:
-        ERRORS.append(f"{path.relative_to(ROOT)}: canonical should be {expected_canonical}")
+        ERRORS.append(f"{rel}: canonical should be {expected_canonical}")
+    if page.canonical and "vercel.app" in page.canonical:
+        ERRORS.append(f"{rel}: staging URL must never be canonical")
 
-    for required_lang in ("en", "tr", "x-default"):
-        if required_lang not in page.alternates:
-            ERRORS.append(f"{path.relative_to(ROOT)}: missing hreflang {required_lang}")
+    expected_alternates = {
+        "en": "https://ainosventures.com/en/",
+        "tr": "https://ainosventures.com/tr/",
+        "x-default": "https://ainosventures.com/en/",
+    }
+    for hreflang, expected_url in expected_alternates.items():
+        if page.alternates.get(hreflang) != expected_url:
+            ERRORS.append(f"{rel}: hreflang {hreflang} should be {expected_url}")
+
+    for required_og in ("og:title", "og:description", "og:type", "og:url", "og:site_name"):
+        if not page.og.get(required_og):
+            ERRORS.append(f"{rel}: missing {required_og}")
+
+    if page.og.get("og:url") != expected_canonical:
+        ERRORS.append(f"{rel}: og:url should match canonical")
+
+    if not page.meta.get("twitter:card"):
+        ERRORS.append(f"{rel}: missing twitter:card")
+
+    if page.robots and "noindex" in page.robots.lower():
+        ERRORS.append(f"{rel}: production language pages must be indexable")
 
     duplicates = sorted({x for x in page.ids if page.ids.count(x) > 1})
     if duplicates:
-        ERRORS.append(f"{path.relative_to(ROOT)}: duplicate ids: {', '.join(duplicates)}")
+        ERRORS.append(f"{rel}: duplicate ids: {', '.join(duplicates)}")
 
     ids = set(page.ids)
     for href in page.hrefs:
         if href.startswith("#") and len(href) > 1 and href[1:] not in ids:
-            ERRORS.append(f"{path.relative_to(ROOT)}: anchor {href} has no target id")
+            ERRORS.append(f"{rel}: anchor {href} has no target id")
 
     for asset in page.assets:
         asset_path = ROOT / asset.lstrip("/")
         if not asset_path.exists():
-            ERRORS.append(f"{path.relative_to(ROOT)}: missing asset {asset}")
+            ERRORS.append(f"{rel}: missing asset {asset}")
+
+    other_lang = "tr" if lang == "en" else "en"
+    if f"/{other_lang}/" not in page.hrefs:
+        ERRORS.append(f"{rel}: missing visible language switch to /{other_lang}/")
 
     if "Mert Özel" in text:
-        WARNINGS.append(f"{path.relative_to(ROOT)} still contains the retired staging team entry in source; rendered JS removes it. Clean this when final bios are merged.")
+        ERRORS.append(f"{rel}: retired team entry Mert Özel must not remain in source")
 
-for required in ["robots.txt", "sitemap.xml", "vercel.json", "404.html", "assets/css/styles.css", "assets/js/main.js", "assets/images/favicon.svg"]:
+for required in [
+    "robots.txt",
+    "sitemap.xml",
+    "vercel.json",
+    "404.html",
+    "assets/css/styles.css",
+    "assets/js/main.js",
+    "assets/images/favicon.svg",
+]:
     if not (ROOT / required).exists():
         ERRORS.append(f"Missing required file: {required}")
 
@@ -115,4 +185,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus deployment, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus metadata, navigation, deployment, SEO and asset requirements.")
