@@ -31,5 +31,8 @@ Production repository for the bilingual Ainos Ventures corporate website.
 ## Current staging
 `https://ainos-ventures-website.vercel.app/en/`
 
+## Waiting on stakeholder inputs
+Brand assets, public case disclosure decisions, team-source material and contact details have been requested from Nidan. These are not blocking technical work.
+
 ## Working method
 GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap and 404 indexing rules on each push and pull request.
