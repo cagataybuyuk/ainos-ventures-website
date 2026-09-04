@@ -34,18 +34,19 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Current Focus approved categories: Energy & Infrastructure; Industrial & Technology; Consumer & Hospitality; Digital Assets & Technology
 - [x] Public contact route confirmed; website uses `contact@ainosventures.com`
 - [x] Personal LinkedIn profiles received for both co-founders
+- [x] Official Ainos Ventures company LinkedIn received and linked from Contact
 - [x] Official monogram applied to navigation and favicon
 - [x] Headshot mapping confirmed: Nidan = photo 1; Tunca = photo 2
 - [x] Founder headshots uploaded and published in responsive team cards
 - [x] Accessibility / keyboard-navigation code pass
 - [x] Custom domain connected: `ainosventures.com`; `www` redirects to apex
+- [x] Active-launch JS/CSS cache policy changed to revalidate so fresh releases are visible immediately
 - [ ] Visual responsive QA
 - [ ] Production launch QA
 - [ ] Final technical release checklist
 
 ## Remaining stakeholder inputs / decisions
 - [ ] Final factual bio copy approval after LinkedIn/background review
-- [ ] Official Ainos Ventures company LinkedIn URL, if/when created
 
 ## Explicitly deferred
 - Social sharing / OG image
