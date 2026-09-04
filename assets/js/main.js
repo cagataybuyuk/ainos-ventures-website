@@ -2,9 +2,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const year=document.querySelector('[data-current-year]');
   if(year) year.textContent=new Date().getFullYear();
 
-  // Temporary content guard for the staging build. Mert Özel is no longer part of
-  // the public Ainos team and is removed from the rendered team grid immediately.
-  // The underlying EN/TR markup will be consolidated with the final team bios.
+  // Temporary staging guard until the final team bios are folded into EN/TR markup.
   document.querySelectorAll('.person').forEach(card=>{
     const name=card.querySelector('h3')?.textContent?.trim();
     if(name==='Mert Özel') card.remove();
@@ -12,6 +10,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('.team-grid').forEach(grid=>{
     if(grid.children.length===2) grid.classList.add('team-grid-two');
   });
+  const teamStyle=document.createElement('style');
+  teamStyle.textContent='.team-grid-two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:900px}@media(max-width:1040px){.team-grid-two{grid-template-columns:1fr;max-width:none}}';
+  document.head.appendChild(teamStyle);
 
   const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const items=document.querySelectorAll('.reveal');
