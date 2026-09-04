@@ -58,7 +58,7 @@ jobs:
           grep -q 'https://ainosventures.com/tr/' "$body"
           grep -q '/assets/css/team-tuning.css' "$body"
           grep -q 'Nidan Akmanoğlu' "$body"
-          grep -q 'işlem yapılandırması ve kurumsal dönüşüm' "$body"
+          grep -q 'işlem yapılandırma ve kurumsal dönüşüm' "$body"
 
       - name: WWW redirects to canonical apex
         shell: bash
