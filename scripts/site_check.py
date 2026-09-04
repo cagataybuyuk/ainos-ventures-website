@@ -195,14 +195,24 @@ if (ROOT / "404.html").exists():
     if not p404.robots or "noindex" not in p404.robots.lower():
         ERRORS.append("404.html must be noindex")
 
-js_text = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
-if "/assets/images/ainos-monogram.svg" not in js_text:
-    ERRORS.append("official Ainos monogram is not wired into the navigation")
-if "contact@ainosventures.com" not in js_text:
-    ERRORS.append("confirmed public contact email is not wired into the site")
-for profile_fragment in ("nidan-akmanoglu-163b6918", "tunca-cingöz-429592a"):
-    if profile_fragment not in js_text:
-        ERRORS.append(f"missing confirmed co-founder LinkedIn profile: {profile_fragment}")
+main_js = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
+for required_js in (
+    "contact@ainosventures.com",
+    "ainos-monogram.svg",
+    "Skip to main content",
+    "Ana içeriğe geç",
+    "prefers-reduced-motion",
+    "aria-expanded",
+):
+    if required_js not in main_js:
+        ERRORS.append(f"main.js missing required production/accessibility wiring: {required_js}")
+
+for profile in (
+    "https://www.linkedin.com/in/tunca-cingöz-429592a/",
+    "https://www.linkedin.com/in/nidan-akmanoglu-163b6918/",
+):
+    if profile not in main_js:
+        ERRORS.append(f"main.js missing approved LinkedIn profile: {profile}")
 
 for warning in WARNINGS:
     print(f"WARNING: {warning}")
@@ -214,4 +224,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus approved focus content, brand, contact, metadata, navigation, deployment, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, brand/contact wiring, SEO and asset requirements.")
