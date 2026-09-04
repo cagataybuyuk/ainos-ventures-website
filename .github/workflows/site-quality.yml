@@ -21,6 +21,8 @@ jobs:
           python-version: '3.12'
       - name: Validate site structure and SEO
         run: python scripts/site_check.py
+      - name: Validate release configuration
+        run: python scripts/release_check.py
       - name: Validate Vercel configuration JSON
         run: python -m json.tool vercel.json > /dev/null
       - name: Validate JavaScript syntax
