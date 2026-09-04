@@ -2,15 +2,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   const year=document.querySelector('[data-current-year]');
   if(year) year.textContent=new Date().getFullYear();
 
-  // Temporary staging guard until the final team bios are folded into EN/TR markup.
-  document.querySelectorAll('.person').forEach(card=>{
-    const name=card.querySelector('h3')?.textContent?.trim();
-    if(name==='Mert Özel') card.remove();
-  });
-  document.querySelectorAll('.team-grid').forEach(grid=>{
-    if(grid.children.length===2) grid.classList.add('team-grid-two');
-  });
-
   const runtimeStyle=document.createElement('style');
   runtimeStyle.textContent=`
     .team-grid-two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:900px}
@@ -37,10 +28,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   const desktopLinks=document.querySelector('.nav-links');
   const langLink=document.querySelector('.lang-link');
   if(nav&&navInner&&desktopLinks&&langLink){
+    const isTr=document.documentElement.lang==='tr';
     const toggle=document.createElement('button');
     toggle.className='mobile-menu-toggle';
     toggle.type='button';
-    toggle.setAttribute('aria-label','Open navigation');
+    toggle.setAttribute('aria-label',isTr?'Navigasyonu aç':'Open navigation');
     toggle.setAttribute('aria-expanded','false');
     toggle.setAttribute('aria-controls','mobile-navigation');
     toggle.innerHTML='<span aria-hidden="true"></span>';
@@ -58,14 +50,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     const closeMenu=()=>{
       menu.classList.remove('is-open');
       toggle.setAttribute('aria-expanded','false');
+      toggle.setAttribute('aria-label',isTr?'Navigasyonu aç':'Open navigation');
     };
     toggle.addEventListener('click',()=>{
       const open=toggle.getAttribute('aria-expanded')==='true';
       toggle.setAttribute('aria-expanded',String(!open));
+      toggle.setAttribute('aria-label',!open?(isTr?'Navigasyonu kapat':'Close navigation'):(isTr?'Navigasyonu aç':'Open navigation'));
       menu.classList.toggle('is-open',!open);
     });
     inner.querySelectorAll('a').forEach(link=>link.addEventListener('click',closeMenu));
     document.addEventListener('keydown',event=>{if(event.key==='Escape') closeMenu();});
+    document.addEventListener('click',event=>{
+      if(menu.classList.contains('is-open')&&!nav.contains(event.target)) closeMenu();
+    });
     window.addEventListener('resize',()=>{if(window.innerWidth>900) closeMenu();},{passive:true});
   }
 
