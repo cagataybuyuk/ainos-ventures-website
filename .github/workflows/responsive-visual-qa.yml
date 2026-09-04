@@ -34,6 +34,30 @@ jobs:
           echo "chrome=$CHROME" >> "$GITHUB_OUTPUT"
           "$CHROME" --version
 
+      - name: Prepare deterministic section QA pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          source = Path('en/index.html').read_text(encoding='utf-8')
+          for section in ('focus', 'team'):
+              qa = source.replace(
+                  '</head>',
+                  '<style>html{scroll-behavior:auto!important}</style></head>',
+                  1,
+              )
+              script = (
+                  "<script>window.addEventListener('load',()=>{"
+                  "setTimeout(()=>{const el=document.getElementById('" + section + "');"
+                  "if(el)el.scrollIntoView({behavior:'instant',block:'start'});},120);"
+                  "});</script>"
+              )
+              qa = qa.replace('</body>', script + '</body>', 1)
+              Path(f'qa-{section}.html').write_text(qa, encoding='utf-8')
+          PY
+
       - name: Start local site
         shell: bash
         run: |
@@ -69,16 +93,16 @@ jobs:
               --disable-dev-shm-usage \
               --hide-scrollbars \
               --run-all-compositor-stages-before-draw \
-              --virtual-time-budget=2200 \
+              --virtual-time-budget=2400 \
               --window-size="${width},${height}" \
               --screenshot="qa-responsive/${width}-${section}.png" \
               "$url"
           }
 
           for width in 1440 1024 768 390 360; do
-            capture "$width" hero  "http://127.0.0.1:4173/en/"        1050
-            capture "$width" focus "http://127.0.0.1:4173/en/#focus"  1050
-            capture "$width" team  "http://127.0.0.1:4173/en/#team"   1150
+            capture "$width" hero  "http://127.0.0.1:4173/en/"             1050
+            capture "$width" focus "http://127.0.0.1:4173/qa-focus.html"  1050
+            capture "$width" team  "http://127.0.0.1:4173/qa-team.html"   1150
           done
 
           ls -lh qa-responsive
