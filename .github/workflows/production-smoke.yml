@@ -11,111 +11,115 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify production routes, redirects and headers
+      - name: Apex root redirects to English
         shell: bash
         run: |
           set -euo pipefail
-
-          tmp="$(mktemp -d)"
-          trap 'rm -rf "$tmp"' EXIT
-
-          request() {
-            local url="$1"
-            local prefix="$2"
-            curl --fail-with-body --silent --show-error --connect-timeout 10 --max-time 30 \
-              -D "$tmp/${prefix}.headers" -o "$tmp/${prefix}.body" "$url"
-          }
-
-          status_only() {
-            curl --silent --show-error --connect-timeout 10 --max-time 30 \
-              -o /dev/null -w '%{http_code}' "$1"
-          }
-
-          header_value() {
-            local file="$1"
-            local name="$2"
-            awk -v IGNORECASE=1 -v key="$name" '
-              BEGIN { FS=":" }
-              tolower($1)==tolower(key) {
-                sub(/^[^:]*:[[:space:]]*/, "")
-                gsub(/\r$/, "")
-                print
-              }
-            ' "$file" | tail -n 1
-          }
-
-          echo 'Checking apex root redirect...'
-          curl --silent --show-error --connect-timeout 10 --max-time 30 \
-            -D "$tmp/root.headers" -o /dev/null https://ainosventures.com/
-          root_status="$(awk 'toupper($1) ~ /^HTTP\// {code=$2} END {print code}' "$tmp/root.headers")"
-          root_location="$(header_value "$tmp/root.headers" Location)"
-          test "$root_status" = '308' || { echo "Expected root 308, got $root_status"; exit 1; }
-          case "$root_location" in
+          headers="$(mktemp)"
+          curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://ainosventures.com/
+          status="$(awk 'toupper($1) ~ /^HTTP\// {code=$2} END {print code}' "$headers")"
+          location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
+          echo "status=$status location=$location"
+          test "$status" = '308'
+          case "$location" in
             /en/|https://ainosventures.com/en/) ;;
-            *) echo "Unexpected root redirect: $root_location"; exit 1 ;;
+            *) echo "Unexpected root redirect: $location"; exit 1 ;;
           esac
 
-          echo 'Checking English production page...'
-          request https://ainosventures.com/en/ en
-          grep -q 'Strategy\. Capital\. Partnership\.' "$tmp/en.body"
-          grep -q 'Current Focus' "$tmp/en.body"
-          grep -q 'https://ainosventures.com/en/' "$tmp/en.body"
-          grep -q '/assets/css/team-tuning.css' "$tmp/en.body"
+      - name: English production page is current
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$body" -w '%{http_code}' https://ainosventures.com/en/)"
+          echo "status=$status"
+          test "$status" = '200'
+          grep -q 'Strategy\. Capital\. Partnership\.' "$body"
+          grep -q 'Current Focus' "$body"
+          grep -q 'https://ainosventures.com/en/' "$body"
+          grep -q '/assets/css/team-tuning.css' "$body"
+          grep -q 'Nidan Akmanoğlu' "$body"
+          grep -q 'transaction structuring and corporate transformation' "$body"
 
-          echo 'Checking Turkish production page...'
-          request https://ainosventures.com/tr/ tr
-          grep -q 'Güncel Odak' "$tmp/tr.body"
-          grep -q 'https://ainosventures.com/tr/' "$tmp/tr.body"
-          grep -q '/assets/css/team-tuning.css' "$tmp/tr.body"
+      - name: Turkish production page is current
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$body" -w '%{http_code}' https://ainosventures.com/tr/)"
+          echo "status=$status"
+          test "$status" = '200'
+          grep -q 'Güncel Odak' "$body"
+          grep -q 'https://ainosventures.com/tr/' "$body"
+          grep -q '/assets/css/team-tuning.css' "$body"
+          grep -q 'Nidan Akmanoğlu' "$body"
+          grep -q 'işlem yapılandırması ve kurumsal dönüşüm' "$body"
 
-          echo 'Checking www canonical redirect...'
-          curl --silent --show-error --connect-timeout 10 --max-time 30 \
-            -D "$tmp/www.headers" -o /dev/null https://www.ainosventures.com/en/
-          www_status="$(awk 'toupper($1) ~ /^HTTP\// {code=$2} END {print code}' "$tmp/www.headers")"
-          www_location="$(header_value "$tmp/www.headers" Location)"
-          test "$www_status" = '308' || { echo "Expected www 308, got $www_status"; exit 1; }
-          case "$www_location" in
+      - name: WWW redirects to canonical apex
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://www.ainosventures.com/en/
+          status="$(awk 'toupper($1) ~ /^HTTP\// {code=$2} END {print code}' "$headers")"
+          location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
+          echo "status=$status location=$location"
+          test "$status" = '308'
+          case "$location" in
             https://ainosventures.com/en/|https://ainosventures.com/en) ;;
-            *) echo "Unexpected www redirect: $www_location"; exit 1 ;;
+            *) echo "Unexpected www redirect: $location"; exit 1 ;;
           esac
 
-          echo 'Checking production security headers...'
-          hsts="$(header_value "$tmp/en.headers" Strict-Transport-Security)"
-          csp="$(header_value "$tmp/en.headers" Content-Security-Policy)"
-          nosniff="$(header_value "$tmp/en.headers" X-Content-Type-Options)"
-          test -n "$hsts" || { echo 'Missing HSTS'; exit 1; }
-          test -n "$csp" || { echo 'Missing CSP'; exit 1; }
-          test "$nosniff" = 'nosniff' || { echo 'Missing nosniff'; exit 1; }
+      - name: Production security headers are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://ainosventures.com/en/
+          cat "$headers"
+          grep -qi '^strict-transport-security:' "$headers"
+          grep -qi '^content-security-policy:' "$headers"
+          grep -qi '^x-content-type-options:[[:space:]]*nosniff' "$headers"
 
-          echo 'Checking robots and sitemap...'
-          request https://ainosventures.com/robots.txt robots
-          grep -q 'https://ainosventures.com/sitemap.xml' "$tmp/robots.body"
-          request https://ainosventures.com/sitemap.xml sitemap
-          grep -q 'https://ainosventures.com/en/' "$tmp/sitemap.body"
-          grep -q 'https://ainosventures.com/tr/' "$tmp/sitemap.body"
+      - name: Robots sitemap and public assets are reachable
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          curl -fsS --connect-timeout 10 --max-time 30 https://ainosventures.com/robots.txt -o "$tmp/robots"
+          grep -q 'https://ainosventures.com/sitemap.xml' "$tmp/robots"
+          curl -fsS --connect-timeout 10 --max-time 30 https://ainosventures.com/sitemap.xml -o "$tmp/sitemap"
+          grep -q 'https://ainosventures.com/en/' "$tmp/sitemap"
+          grep -q 'https://ainosventures.com/tr/' "$tmp/sitemap"
+          for url in \
+            https://ainosventures.com/assets/css/team-tuning.css \
+            https://ainosventures.com/assets/images/tunca-web.jpg \
+            https://ainosventures.com/assets/images/nidan-web.jpg; do
+            status="$(curl -sS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' "$url")"
+            echo "$url -> $status"
+            test "$status" = '200'
+          done
 
-          echo 'Checking founder assets and responsive stylesheet...'
-          test "$(status_only https://ainosventures.com/assets/css/team-tuning.css)" = '200'
-          test "$(status_only https://ainosventures.com/assets/images/tunca-web.jpg)" = '200'
-          test "$(status_only https://ainosventures.com/assets/images/nidan-web.jpg)" = '200'
+      - name: Branded 404 returns 404 and noindex
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$body" -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
+          echo "status=$status"
+          test "$status" = '404'
+          grep -qi 'noindex' "$body"
 
-          echo 'Checking branded 404 behavior...'
-          not_found_status="$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
-            -D "$tmp/404.headers" -o "$tmp/404.body" -w '%{http_code}' \
-            https://ainosventures.com/__ainos_smoke_not_found__)"
-          test "$not_found_status" = '404' || { echo "Expected 404, got $not_found_status"; exit 1; }
-          grep -qi 'noindex' "$tmp/404.body"
-
-          echo 'Checking staging noindex protection...'
-          curl --silent --show-error --connect-timeout 10 --max-time 30 \
-            -D "$tmp/staging.headers" -o /dev/null \
-            https://ainos-ventures-website.vercel.app/en/
-          staging_robots="$(header_value "$tmp/staging.headers" X-Robots-Tag)"
-          echo "$staging_robots" | grep -qi 'noindex' || { echo 'Staging is missing X-Robots-Tag noindex'; exit 1; }
-
-          echo 'PRODUCTION SMOKE PASSED'
+      - name: Staging remains noindex
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://ainos-ventures-website.vercel.app/en/
+          cat "$headers"
+          grep -qi '^x-robots-tag:.*noindex' "$headers"
