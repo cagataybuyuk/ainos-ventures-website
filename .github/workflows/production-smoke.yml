@@ -108,11 +108,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          status="$(curl -sS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
-          echo "status=$status"
+          status="$(curl -LsS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
+          echo "final status=$status"
           test "$status" = '404'
-          # A true HTTP 404 is itself a non-indexable error response. The local
-          # branded 404 source is separately validated by scripts/site_check.py.
+          # Vercel first canonicalizes unknown paths to the configured trailing-slash form.
+          # Follow that redirect, then require the terminal response to be a true 404.
           grep -qi 'noindex' 404.html
 
       - name: Staging remains noindex
