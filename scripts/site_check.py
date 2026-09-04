@@ -149,6 +149,25 @@ for path, lang in PAGES.items():
     if "Mert Özel" in text:
         ERRORS.append(f"{rel}: retired team entry Mert Özel must not remain in source")
 
+    if 'id="focus"' not in text:
+        ERRORS.append(f"{rel}: approved Current Focus section is missing")
+
+    if "Selected Work" in text or "Seçilmiş Çalışmalar" in text:
+        ERRORS.append(f"{rel}: retired Selected Work wording must not remain")
+
+    for retired_figure in ("~$50m", "~€100m"):
+        if retired_figure in text:
+            ERRORS.append(f"{rel}: retired deal figure {retired_figure} must not remain")
+
+    expected_focus = (
+        ("Energy & Infrastructure", "Industrial & Technology", "Consumer & Hospitality", "Digital Assets & Technology")
+        if lang == "en"
+        else ("Enerji & Altyapı", "Sanayi & Teknoloji", "Tüketici & Konaklama", "Dijital Varlıklar & Teknoloji")
+    )
+    for focus_name in expected_focus:
+        if focus_name not in text:
+            ERRORS.append(f"{rel}: missing approved focus area {focus_name}")
+
 for required in [
     "robots.txt",
     "sitemap.xml",
@@ -185,4 +204,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus metadata, navigation, deployment, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, SEO and asset requirements.")
