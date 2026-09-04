@@ -35,6 +35,7 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Public contact route confirmed; website uses `contact@ainosventures.com`
 - [x] Personal LinkedIn profiles received for both co-founders
 - [x] Official monogram applied to navigation and favicon
+- [x] CI validates official brand, contact and LinkedIn wiring
 - [ ] Cross-browser + mobile QA
 - [ ] Final launch QA
 - [ ] Connect custom domain `ainosventures.com`
@@ -53,4 +54,4 @@ These items do not block technical hardening or QA work.
 `https://ainos-ventures-website.vercel.app/en/`
 
 ## Working method
-GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration and 404 indexing rules on each push and pull request.
+GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, brand wiring and 404 indexing rules on each push and pull request.
