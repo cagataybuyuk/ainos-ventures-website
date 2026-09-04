@@ -176,6 +176,7 @@ for required in [
     "assets/css/styles.css",
     "assets/js/main.js",
     "assets/images/favicon.svg",
+    "assets/images/ainos-monogram.svg",
 ]:
     if not (ROOT / required).exists():
         ERRORS.append(f"Missing required file: {required}")
@@ -194,6 +195,15 @@ if (ROOT / "404.html").exists():
     if not p404.robots or "noindex" not in p404.robots.lower():
         ERRORS.append("404.html must be noindex")
 
+js_text = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
+if "/assets/images/ainos-monogram.svg" not in js_text:
+    ERRORS.append("official Ainos monogram is not wired into the navigation")
+if "contact@ainosventures.com" not in js_text:
+    ERRORS.append("confirmed public contact email is not wired into the site")
+for profile_fragment in ("nidan-akmanoglu-163b6918", "tunca-cingöz-429592a"):
+    if profile_fragment not in js_text:
+        ERRORS.append(f"missing confirmed co-founder LinkedIn profile: {profile_fragment}")
+
 for warning in WARNINGS:
     print(f"WARNING: {warning}")
 
@@ -204,4 +214,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, brand, contact, metadata, navigation, deployment, SEO and asset requirements.")
