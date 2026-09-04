@@ -43,8 +43,10 @@ jobs:
           grep -q 'Current Focus' "$body"
           grep -q 'https://ainosventures.com/en/' "$body"
           grep -q '/assets/css/team-tuning.css' "$body"
+          grep -q 'Tunca Cingöz' "$body"
+          grep -q 'Brings an entrepreneurial and commercial perspective to strategy, business development, investments and long-term partnerships.' "$body"
           grep -q 'Nidan Akmanoğlu' "$body"
-          grep -q 'transaction structuring and corporate transformation' "$body"
+          grep -q 'Brings a financial and strategic perspective to transactions, capital structuring, transformation and value creation.' "$body"
 
       - name: Turkish production page is current
         shell: bash
@@ -57,8 +59,10 @@ jobs:
           grep -q 'Güncel Odak' "$body"
           grep -q 'https://ainosventures.com/tr/' "$body"
           grep -q '/assets/css/team-tuning.css' "$body"
+          grep -q 'Tunca Cingöz' "$body"
+          grep -q 'Strateji, iş geliştirme, yatırımlar ve uzun vadeli iş ortaklıklarına girişimci ve ticari bir bakış açısı getirir.' "$body"
           grep -q 'Nidan Akmanoğlu' "$body"
-          grep -q 'işlem yapılandırma ve kurumsal dönüşüm' "$body"
+          grep -q 'İşlemler, sermaye yapılandırması, dönüşüm ve değer yaratımına finansal ve stratejik bir bakış açısı getirir.' "$body"
 
       - name: WWW redirects to canonical apex
         shell: bash
