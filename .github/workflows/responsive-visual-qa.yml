@@ -34,29 +34,9 @@ jobs:
           echo "chrome=$CHROME" >> "$GITHUB_OUTPUT"
           "$CHROME" --version
 
-      - name: Prepare deterministic section QA pages
+      - name: Install QA browser controller
         shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          source = Path('en/index.html').read_text(encoding='utf-8')
-          for section in ('focus', 'team'):
-              qa = source.replace(
-                  '</head>',
-                  '<style>html{scroll-behavior:auto!important}</style></head>',
-                  1,
-              )
-              script = (
-                  "<script>window.addEventListener('load',()=>{"
-                  "setTimeout(()=>{const el=document.getElementById('" + section + "');"
-                  "if(el)el.scrollIntoView({behavior:'instant',block:'start'});},120);"
-                  "});</script>"
-              )
-              qa = qa.replace('</body>', script + '</body>', 1)
-              Path(f'qa-{section}.html').write_text(qa, encoding='utf-8')
-          PY
+        run: npm install --no-save --no-package-lock puppeteer-core@24
 
       - name: Start local site
         shell: bash
@@ -80,30 +60,55 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p qa-responsive
+          node <<'JS'
+          const puppeteer = require('puppeteer-core');
+          const path = require('path');
 
-          capture() {
-            width="$1"
-            section="$2"
-            url="$3"
-            height="$4"
-            "$CHROME" \
-              --headless=new \
-              --no-sandbox \
-              --disable-gpu \
-              --disable-dev-shm-usage \
-              --hide-scrollbars \
-              --run-all-compositor-stages-before-draw \
-              --virtual-time-budget=2400 \
-              --window-size="${width},${height}" \
-              --screenshot="qa-responsive/${width}-${section}.png" \
-              "$url"
-          }
+          const widths = [1440, 1024, 768, 390, 360];
+          const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-          for width in 1440 1024 768 390 360; do
-            capture "$width" hero  "http://127.0.0.1:4173/en/"             1050
-            capture "$width" focus "http://127.0.0.1:4173/qa-focus.html"  1050
-            capture "$width" team  "http://127.0.0.1:4173/qa-team.html"   1150
-          done
+          (async () => {
+            const browser = await puppeteer.launch({
+              executablePath: process.env.CHROME,
+              headless: true,
+              args: ['--no-sandbox', '--disable-dev-shm-usage', '--hide-scrollbars']
+            });
+
+            try {
+              for (const width of widths) {
+                const page = await browser.newPage();
+                await page.setViewport({ width, height: 1100, deviceScaleFactor: 1 });
+                await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+                await page.goto('http://127.0.0.1:4173/en/', { waitUntil: 'networkidle0' });
+                await wait(150);
+
+                await page.screenshot({
+                  path: path.join('qa-responsive', `${width}-hero.png`),
+                  fullPage: false
+                });
+
+                for (const section of ['focus', 'team']) {
+                  await page.evaluate((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+                  }, section);
+                  await wait(180);
+                  await page.screenshot({
+                    path: path.join('qa-responsive', `${width}-${section}.png`),
+                    fullPage: false
+                  });
+                }
+
+                await page.close();
+              }
+            } finally {
+              await browser.close();
+            }
+          })().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          JS
 
           ls -lh qa-responsive
 
