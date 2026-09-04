@@ -12,16 +12,17 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Vercel deployment config
 - Baseline security headers
 - Branded 404 page
-- Minimal favicon
+- Official Ainos monogram favicon / navigation mark
 - Accessible mobile navigation
 - Automated GitHub Actions site-quality checks
 
 ## Approved positioning / brand direction
 - Tagline: `Strategy · Capital · Partnership.`
 - Warm ivory / off-white background
-- Charcoal typography
+- Charcoal typography (`#1C1C1C` reference)
 - Minimal editorial visual language
-- Business card visual will be used as the primary final brand reference once received
+- Official vector logo package received
+- Business-card visual can remain an optional reference if exact print-layout matching is needed
 
 ## Milestone status
 - [x] Milestone 1 — Production shell
@@ -31,18 +32,20 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Mert Özel removed from EN/TR source and core-team layout rebalanced
 - [x] Replace Selected Work / deal figures with Current Focus
 - [x] Current Focus approved categories: Energy & Infrastructure; Industrial & Technology; Consumer & Hospitality; Digital Assets & Technology
+- [x] Public contact route confirmed; website uses `contact@ainosventures.com`
+- [x] Personal LinkedIn profiles received for both co-founders
+- [x] Official monogram applied to navigation and favicon
 - [ ] Cross-browser + mobile QA
 - [ ] Final launch QA
 - [ ] Connect custom domain `ainosventures.com`
 
-## Waiting on stakeholder inputs
-The following items remain parked until materials arrive from Nidan:
-- [ ] Final logo / business-card visual / source brand assets
-- [ ] Factual source material for final Tunca and Nidan bios
-- [ ] Confirm team photography approach / provide headshots if used
-- [ ] Confirm public contact email / contact flow
-- [ ] Official Ainos Ventures LinkedIn URL
-- [ ] Social preview image after final brand assets
+## Waiting on stakeholder inputs / decisions
+- [ ] Explicit mapping of the two supplied headshots to Tunca / Nidan before publishing them
+- [ ] Final factual bio copy approval after LinkedIn/background review
+- [ ] Official Ainos Ventures company LinkedIn URL, if/when created
+- [ ] Social preview image based on final brand assets
+
+`info@ainosventures.com` is also available as a secondary company inbox.
 
 These items do not block technical hardening or QA work.
 
