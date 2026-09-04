@@ -4,12 +4,18 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   const runtimeStyle=document.createElement('style');
   runtimeStyle.textContent=`
+    :root{--ink:#1c1c1c;--dark:#1c1c1c;--dark-2:#262624}
     [id]{scroll-margin-top:96px}
     .hero-main,.hero-side,.cap,.work,.panel,.person,.insight-card>*{min-width:0}
+    .brand .mark:before,.brand .mark:after{display:none!important}
+    .brand .mark{width:29px;height:31px;display:grid;place-items:center}
+    .brand-mark-img{display:block;width:26px;height:28px;object-fit:contain}
     .team-grid-two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:900px}
     .current-focus-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
     .focus-card{min-height:320px}
     .focus-title{font-size:clamp(28px,2.5vw,38px);line-height:1.02;font-weight:500;margin:0;letter-spacing:-.035em}
+    .person-link{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);width:max-content;border-bottom:1px solid var(--line-strong);padding-bottom:3px}
+    .person-link:hover{color:var(--ink)}
     .mobile-menu-toggle,.mobile-menu{display:none}
     .mobile-menu-toggle,.lang-link,.btn{touch-action:manipulation}
 
@@ -67,8 +73,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     @media(max-width:360px){
       .wrap{width:min(calc(100% - 24px),var(--max))}
       .brand{gap:10px}
-      .mark{width:32px}
-      .mark:before,.mark:after{width:19px;height:19px}
+      .brand .mark{width:26px;height:28px}
+      .brand-mark-img{width:23px;height:25px}
       .brand-name{font-size:11px}
       .nav-inner{gap:10px}
       .lang-link{padding:7px 9px}
@@ -78,6 +84,32 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   `;
   document.head.appendChild(runtimeStyle);
+
+  document.querySelectorAll('.brand .mark').forEach(mark=>{
+    mark.innerHTML='<img class="brand-mark-img" src="/assets/images/ainos-monogram.svg" alt="">';
+  });
+
+  document.querySelectorAll('a[href="mailto:info@ainosventures.com"]').forEach(link=>{
+    link.href='mailto:contact@ainosventures.com';
+    link.textContent='contact@ainosventures.com';
+  });
+
+  const linkedinProfiles={
+    'Tunca Cingöz':'https://www.linkedin.com/in/tunca-cingöz-429592a/',
+    'Nidan Akmanoğlu':'https://www.linkedin.com/in/nidan-akmanoglu-163b6918/'
+  };
+  document.querySelectorAll('.person').forEach(card=>{
+    const name=card.querySelector('h3')?.textContent?.trim();
+    const href=linkedinProfiles[name];
+    if(!href||card.querySelector('.person-link')) return;
+    const link=document.createElement('a');
+    link.className='person-link';
+    link.href=href;
+    link.target='_blank';
+    link.rel='noopener noreferrer';
+    link.textContent='LinkedIn ↗';
+    card.appendChild(link);
+  });
 
   const nav=document.querySelector('.nav');
   const navInner=document.querySelector('.nav-inner');
