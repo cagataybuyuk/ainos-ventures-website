@@ -59,4 +59,4 @@ Production: `https://ainosventures.com/`
 Staging: `https://ainos-ventures-website.vercel.app/en/`
 
 ## Working method
-GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, brand wiring and 404 indexing rules on each push and pull request.
+GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, accessibility wiring, brand/contact wiring and 404 indexing rules on each push and pull request.
