@@ -111,20 +111,25 @@ jobs:
           status="$(curl -LsS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
           echo "final status=$status"
           test "$status" = '404'
-          # Vercel first canonicalizes unknown paths to the configured trailing-slash form.
-          # Follow that redirect, then require the terminal response to be a true 404.
           grep -qi 'noindex' 404.html
 
       - name: Staging is non-canonical
         shell: bash
         run: |
           set -euo pipefail
-          headers="$(mktemp)"
+          headers="staging-response.headers"
           curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://ainos-ventures-website.vercel.app/en/
           status="$(awk 'toupper($1) ~ /^HTTP\// {code=$2} END {print code}' "$headers")"
           location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
           robots="$(awk 'BEGIN{IGNORECASE=1} /^x-robots-tag:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
-          echo "status=$status location=$location x-robots-tag=$robots"
+          {
+            echo "status=$status"
+            echo "location=$location"
+            echo "x-robots-tag=$robots"
+            echo '--- headers ---'
+            cat "$headers"
+          } > staging-diagnostic.txt
+          cat staging-diagnostic.txt
 
           if echo "$robots" | grep -qi 'noindex'; then
             exit 0
@@ -136,3 +141,12 @@ jobs:
 
           echo 'Staging must either send noindex or redirect to the canonical production host.'
           exit 1
+
+      - name: Upload staging diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-diagnostic
+          path: staging-diagnostic.txt
+          if-no-files-found: warn
+          retention-days: 3
