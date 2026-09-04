@@ -142,6 +142,9 @@ for path, lang in PAGES.items():
         if not asset_path.exists():
             ERRORS.append(f"{rel}: missing asset {asset}")
 
+    if "/assets/css/team-tuning.css" not in page.hrefs:
+        ERRORS.append(f"{rel}: missing responsive team tuning stylesheet")
+
     other_lang = "tr" if lang == "en" else "en"
     if f"/{other_lang}/" not in page.hrefs:
         ERRORS.append(f"{rel}: missing visible language switch to /{other_lang}/")
@@ -174,6 +177,7 @@ for required in [
     "vercel.json",
     "404.html",
     "assets/css/styles.css",
+    "assets/css/team-tuning.css",
     "assets/js/main.js",
     "assets/images/favicon.svg",
     "assets/images/ainos-monogram.svg",
@@ -203,11 +207,11 @@ for required_js in (
     "ainos-monogram.svg",
     "nidan-web.jpg",
     "tunca-web.jpg",
-    "https://www.linkedin.com/company/ainos-ventures/",
     "Skip to main content",
     "Ana içeriğe geç",
     "prefers-reduced-motion",
     "aria-expanded",
+    "https://www.linkedin.com/company/ainos-ventures/",
 ):
     if required_js not in main_js:
         ERRORS.append(f"main.js missing required production/accessibility/team wiring: {required_js}")
@@ -229,4 +233,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, brand/contact/team wiring, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, brand/contact/team wiring, responsive tuning, SEO and asset requirements.")
