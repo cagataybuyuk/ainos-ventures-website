@@ -177,6 +177,8 @@ for required in [
     "assets/js/main.js",
     "assets/images/favicon.svg",
     "assets/images/ainos-monogram.svg",
+    "assets/images/nidan-web.jpg",
+    "assets/images/tunca-web.jpg",
 ]:
     if not (ROOT / required).exists():
         ERRORS.append(f"Missing required file: {required}")
@@ -199,13 +201,15 @@ main_js = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "a
 for required_js in (
     "contact@ainosventures.com",
     "ainos-monogram.svg",
+    "nidan-web.jpg",
+    "tunca-web.jpg",
     "Skip to main content",
     "Ana içeriğe geç",
     "prefers-reduced-motion",
     "aria-expanded",
 ):
     if required_js not in main_js:
-        ERRORS.append(f"main.js missing required production/accessibility wiring: {required_js}")
+        ERRORS.append(f"main.js missing required production/accessibility/team wiring: {required_js}")
 
 for profile in (
     "https://www.linkedin.com/in/tunca-cingöz-429592a/",
@@ -224,4 +228,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, brand/contact wiring, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, brand/contact/team wiring, SEO and asset requirements.")
