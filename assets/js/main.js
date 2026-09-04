@@ -11,7 +11,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     .brand .mark:before,.brand .mark:after{display:none!important}
     .brand .mark{width:29px;height:31px;display:grid;place-items:center}
     .brand-mark-img{display:block;width:26px;height:28px;object-fit:contain}
-    .team-grid-two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:900px}
+    .team-grid-two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:960px}
+    .person{overflow:hidden}
+    .person-photo-wrap{position:relative;aspect-ratio:4/3;margin:-26px -26px 28px;overflow:hidden;background:var(--bg-soft);border-bottom:1px solid var(--line)}
+    .person-photo{width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(.98);transition:transform .45s ease,filter .45s ease}
+    .person-photo[data-person='Nidan Akmanoğlu']{object-position:center 28%}
+    .person-photo[data-person='Tunca Cingöz']{object-position:center 30%}
+    .person:hover .person-photo{transform:scale(1.012);filter:saturate(.98) contrast(1)}
+    .person-no{margin-bottom:32px}
     .current-focus-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
     .focus-card{min-height:320px}
     .focus-title{font-size:clamp(28px,2.5vw,38px);line-height:1.02;font-weight:500;margin:0;letter-spacing:-.035em}
@@ -49,6 +56,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       .side-fact{grid-template-columns:88px minmax(0,1fr)}
       .work-topline{flex-wrap:wrap}
       .work-status{margin-left:0}
+      .person-photo-wrap{aspect-ratio:16/11}
     }
 
     @media(max-width:430px){
@@ -63,6 +71,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       .side-title{font-size:27px}
       .side-fact{grid-template-columns:78px minmax(0,1fr);gap:10px}
       .cap,.panel,.person,.work{padding:22px}
+      .person-photo-wrap{margin:-22px -22px 24px;aspect-ratio:5/4}
       .work{min-height:340px}
       .focus-card{min-height:250px}
       .work-topline{display:grid;justify-items:start}
@@ -89,6 +98,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     @media(prefers-reduced-motion:reduce){
       html{scroll-behavior:auto}
       .reveal{transition:none!important;transform:none!important}
+      .person-photo{transition:none!important}
+      .person:hover .person-photo{transform:none}
       .btn,.nav-links a:after,.mobile-menu-toggle span,.mobile-menu-toggle span:before,.mobile-menu-toggle span:after{transition:none!important}
     }
   `;
@@ -116,22 +127,51 @@ document.addEventListener('DOMContentLoaded',()=>{
     link.setAttribute('aria-label',isTr?'Ainos Ventures ile e-posta üzerinden iletişime geç':'Email Ainos Ventures');
   });
 
-  const linkedinProfiles={
-    'Tunca Cingöz':'https://www.linkedin.com/in/tunca-cingöz-429592a/',
-    'Nidan Akmanoğlu':'https://www.linkedin.com/in/nidan-akmanoglu-163b6918/'
+  const teamProfiles={
+    'Tunca Cingöz':{
+      linkedin:'https://www.linkedin.com/in/tunca-cingöz-429592a/',
+      photo:'/assets/images/tunca-web.jpg',
+      width:'600',
+      height:'800'
+    },
+    'Nidan Akmanoğlu':{
+      linkedin:'https://www.linkedin.com/in/nidan-akmanoglu-163b6918/',
+      photo:'/assets/images/nidan-web.jpg',
+      width:'600',
+      height:'784'
+    }
   };
   document.querySelectorAll('.person').forEach(card=>{
     const name=card.querySelector('h3')?.textContent?.trim();
-    const href=linkedinProfiles[name];
-    if(!href||card.querySelector('.person-link')) return;
-    const link=document.createElement('a');
-    link.className='person-link';
-    link.href=href;
-    link.target='_blank';
-    link.rel='noopener noreferrer';
-    link.textContent='LinkedIn ↗';
-    link.setAttribute('aria-label',`${name} LinkedIn${isTr?' profilini yeni sekmede aç':' profile, opens in a new tab'}`);
-    card.appendChild(link);
+    const profile=teamProfiles[name];
+    if(!profile) return;
+
+    if(!card.querySelector('.person-photo-wrap')){
+      const wrap=document.createElement('div');
+      wrap.className='person-photo-wrap';
+      const image=document.createElement('img');
+      image.className='person-photo';
+      image.src=profile.photo;
+      image.alt='';
+      image.loading='lazy';
+      image.decoding='async';
+      image.width=Number(profile.width);
+      image.height=Number(profile.height);
+      image.dataset.person=name;
+      wrap.appendChild(image);
+      card.insertBefore(wrap,card.firstChild);
+    }
+
+    if(!card.querySelector('.person-link')){
+      const link=document.createElement('a');
+      link.className='person-link';
+      link.href=profile.linkedin;
+      link.target='_blank';
+      link.rel='noopener noreferrer';
+      link.textContent='LinkedIn ↗';
+      link.setAttribute('aria-label',`${name} LinkedIn${isTr?' profilini yeni sekmede aç':' profile, opens in a new tab'}`);
+      card.appendChild(link);
+    }
   });
 
   const nav=document.querySelector('.nav');
