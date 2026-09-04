@@ -42,7 +42,7 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Founder role summaries aligned to responsibilities at Ainos Ventures
 - [x] Accessibility / keyboard-navigation code pass
 - [x] Custom domain connected: `ainosventures.com`; `www` redirects to apex
-- [x] Visual responsive QA — EN/TR at 1440 / 1024 / 768 / 390 / 360 px
+- [x] Visual responsive QA — EN/TR hero, Current Focus and Team reviewed at 1440 / 1024 / 768 / 390 / 360 px
 - [ ] Production launch QA
 - [ ] Final technical release checklist
 
