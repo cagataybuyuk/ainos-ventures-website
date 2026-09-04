@@ -16,6 +16,7 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Accessible mobile navigation with keyboard focus management
 - Skip-to-content support and reduced-motion handling
 - Automated GitHub Actions site-quality checks
+- Automated bilingual responsive visual QA at 1440 / 1024 / 768 / 390 / 360 px
 
 ## Approved positioning / brand direction
 - Tagline: `Strategy · Capital · Partnership.`
@@ -34,14 +35,14 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Current Focus approved categories: Energy & Infrastructure; Industrial & Technology; Consumer & Hospitality; Digital Assets & Technology
 - [x] Public contact route confirmed; website uses `contact@ainosventures.com`
 - [x] Personal LinkedIn profiles received for both co-founders
-- [x] Official Ainos Ventures company LinkedIn received and linked from Contact
+- [x] Official Ainos Ventures company LinkedIn linked from Contact
 - [x] Official monogram applied to navigation and favicon
 - [x] Headshot mapping confirmed: Nidan = photo 1; Tunca = photo 2
-- [x] Founder headshots uploaded and published in responsive team cards
+- [x] Founder headshots uploaded and published in centered responsive team cards
+- [x] Founder role summaries aligned to responsibilities at Ainos Ventures
 - [x] Accessibility / keyboard-navigation code pass
 - [x] Custom domain connected: `ainosventures.com`; `www` redirects to apex
-- [x] Active-launch JS/CSS cache policy changed to revalidate so fresh releases are visible immediately
-- [ ] Visual responsive QA
+- [x] Visual responsive QA — EN/TR at 1440 / 1024 / 768 / 390 / 360 px
 - [ ] Production launch QA
 - [ ] Final technical release checklist
 
@@ -60,4 +61,4 @@ Production: `https://ainosventures.com/`
 Staging: `https://ainos-ventures-website.vercel.app/en/`
 
 ## Working method
-GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, accessibility wiring, brand/contact/team wiring and 404 indexing rules on each push and pull request.
+GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, accessibility wiring, brand/contact/team wiring and 404 indexing rules on each push and pull request. A separate responsive visual workflow uses headless Chrome to capture EN and TR hero, Current Focus and Team views at five target viewport widths for visual regression review.
