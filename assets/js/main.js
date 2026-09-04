@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     .focus-title{font-size:clamp(28px,2.5vw,38px);line-height:1.02;font-weight:500;margin:0;letter-spacing:-.035em}
     .person-link{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);width:max-content;border-bottom:1px solid var(--line-strong);padding-bottom:3px}
     .person-link:hover{color:var(--ink)}
+    .contact-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:28px}
+    .contact-actions .btn{margin-top:0}
+    .contact-actions .company-link{background:transparent}
     .skip-link{position:fixed;left:16px;top:12px;z-index:9999;padding:10px 14px;border-radius:999px;background:var(--ink);color:#fff;font-size:13px;transform:translateY(-160%);transition:transform .16s ease}
     .skip-link:focus{transform:translateY(0)}
     .mobile-menu-toggle,.mobile-menu{display:none}
@@ -126,6 +129,24 @@ document.addEventListener('DOMContentLoaded',()=>{
     link.textContent='contact@ainosventures.com';
     link.setAttribute('aria-label',isTr?'Ainos Ventures ile e-posta üzerinden iletişime geç':'Email Ainos Ventures');
   });
+
+  const contactWrap=document.querySelector('.contact .wrap');
+  const emailButton=contactWrap?.querySelector('a.btn[href^="mailto:"]');
+  if(contactWrap&&emailButton&&!contactWrap.querySelector('.contact-actions')){
+    const actions=document.createElement('div');
+    actions.className='contact-actions';
+    emailButton.parentNode.insertBefore(actions,emailButton);
+    actions.appendChild(emailButton);
+
+    const companyLink=document.createElement('a');
+    companyLink.className='btn company-link';
+    companyLink.href='https://www.linkedin.com/company/ainos-ventures/';
+    companyLink.target='_blank';
+    companyLink.rel='noopener noreferrer';
+    companyLink.textContent='LinkedIn ↗';
+    companyLink.setAttribute('aria-label',isTr?'Ainos Ventures LinkedIn sayfasını yeni sekmede aç':'Open Ainos Ventures on LinkedIn in a new tab');
+    actions.appendChild(companyLink);
+  }
 
   const teamProfiles={
     'Tunca Cingöz':{
