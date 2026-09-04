@@ -203,6 +203,7 @@ for required_js in (
     "ainos-monogram.svg",
     "nidan-web.jpg",
     "tunca-web.jpg",
+    "https://www.linkedin.com/company/ainos-ventures/",
     "Skip to main content",
     "Ana içeriğe geç",
     "prefers-reduced-motion",
