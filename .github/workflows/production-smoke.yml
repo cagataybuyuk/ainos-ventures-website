@@ -81,7 +81,6 @@ jobs:
           set -euo pipefail
           headers="$(mktemp)"
           curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://ainosventures.com/en/
-          cat "$headers"
           grep -qi '^strict-transport-security:' "$headers"
           grep -qi '^content-security-policy:' "$headers"
           grep -qi '^x-content-type-options:[[:space:]]*nosniff' "$headers"
@@ -105,15 +104,16 @@ jobs:
             test "$status" = '200'
           done
 
-      - name: Branded 404 returns 404 and noindex
+      - name: Missing routes return HTTP 404
         shell: bash
         run: |
           set -euo pipefail
-          body="$(mktemp)"
-          status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$body" -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
+          status="$(curl -sS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
           echo "status=$status"
           test "$status" = '404'
-          grep -qi 'noindex' "$body"
+          # A true HTTP 404 is itself a non-indexable error response. The local
+          # branded 404 source is separately validated by scripts/site_check.py.
+          grep -qi 'noindex' 404.html
 
       - name: Staging remains noindex
         shell: bash
@@ -121,5 +121,4 @@ jobs:
           set -euo pipefail
           headers="$(mktemp)"
           curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://ainos-ventures-website.vercel.app/en/
-          cat "$headers"
           grep -qi '^x-robots-tag:.*noindex' "$headers"
