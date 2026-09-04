@@ -1,0 +1,92 @@
+name: Responsive visual QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - 'assets/**'
+      - '.github/workflows/responsive-visual-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find browser
+        id: browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then
+            echo "No Chrome/Chromium browser found on runner" >&2
+            exit 1
+          fi
+          echo "chrome=$CHROME" >> "$GITHUB_OUTPUT"
+          "$CHROME" --version
+
+      - name: Start local site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/ainos-http.log 2>&1 &
+          echo $! > /tmp/ainos-http.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/en/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/ainos-http.log >&2 || true
+          exit 1
+
+      - name: Capture responsive screenshots
+        shell: bash
+        env:
+          CHROME: ${{ steps.browser.outputs.chrome }}
+        run: |
+          set -euo pipefail
+          mkdir -p qa-responsive
+
+          capture() {
+            width="$1"
+            section="$2"
+            url="$3"
+            height="$4"
+            "$CHROME" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --disable-dev-shm-usage \
+              --hide-scrollbars \
+              --run-all-compositor-stages-before-draw \
+              --virtual-time-budget=2200 \
+              --window-size="${width},${height}" \
+              --screenshot="qa-responsive/${width}-${section}.png" \
+              "$url"
+          }
+
+          for width in 1440 1024 768 390 360; do
+            capture "$width" hero  "http://127.0.0.1:4173/en/"        1050
+            capture "$width" focus "http://127.0.0.1:4173/en/#focus"  1050
+            capture "$width" team  "http://127.0.0.1:4173/en/#team"   1150
+          done
+
+          ls -lh qa-responsive
+
+      - name: Upload responsive QA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-visual-qa
+          path: qa-responsive/*.png
+          if-no-files-found: error
+          retention-days: 14
