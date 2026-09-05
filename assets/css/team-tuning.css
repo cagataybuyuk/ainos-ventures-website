@@ -5,10 +5,12 @@
   margin-right:auto !important;
 }
 
-.team-grid-two + .network-note{
-  max-width:1040px;
-  margin-left:auto;
-  margin-right:auto;
+/* V1 editorial polish: keep public launch concise until deferred content is ready. */
+.team-grid-two + .network-note,
+#insights,
+.nav-links a[href="#insights"],
+.mobile-menu a[href="#insights"]{
+  display:none !important;
 }
 
 .person-photo[data-person='Nidan Akmanoğlu']{
