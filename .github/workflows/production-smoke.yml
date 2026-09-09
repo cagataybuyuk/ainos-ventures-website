@@ -47,6 +47,8 @@ jobs:
           grep -q 'Brings an entrepreneurial and commercial perspective to strategy, business development, investments and long-term partnerships.' "$body"
           grep -q 'Nidan Akmanoğlu' "$body"
           grep -q 'Brings a financial and strategic perspective to transactions, capital structuring, transformation and value creation.' "$body"
+          grep -q 'https://ainosventures.com/assets/images/ainos-social-card.png' "$body"
+          grep -q 'summary_large_image' "$body"
 
       - name: Turkish production page is current
         shell: bash
@@ -63,6 +65,8 @@ jobs:
           grep -q 'Strateji, iş geliştirme, yatırımlar ve uzun vadeli iş ortaklıklarına girişimci ve ticari bir bakış açısı getirir.' "$body"
           grep -q 'Nidan Akmanoğlu' "$body"
           grep -q 'İşlemler, sermaye yapılandırması, dönüşüm ve değer yaratımına finansal ve stratejik bir bakış açısı getirir.' "$body"
+          grep -q 'https://ainosventures.com/assets/images/ainos-social-card.png' "$body"
+          grep -q 'summary_large_image' "$body"
 
       - name: WWW redirects to canonical apex
         shell: bash
@@ -110,11 +114,29 @@ jobs:
             https://ainosventures.com/assets/css/site-enhancements.css \
             https://ainosventures.com/assets/css/team-tuning.css \
             https://ainosventures.com/assets/images/tunca-web.jpg \
-            https://ainosventures.com/assets/images/nidan-web.jpg; do
+            https://ainosventures.com/assets/images/nidan-web.jpg \
+            https://ainosventures.com/assets/images/ainos-social-card.png; do
             status="$(curl -sS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' "$url")"
             echo "$url -> $status"
             test "$status" = '200'
           done
+
+          social_headers="$tmp/social-headers"
+          social_file="$tmp/social-card.png"
+          curl -fsS --connect-timeout 10 --max-time 30 -D "$social_headers" https://ainosventures.com/assets/images/ainos-social-card.png -o "$social_file"
+          grep -qi '^content-type:[[:space:]]*image/png' "$social_headers"
+          python3 - "$social_file" <<'PY'
+          import struct
+          import sys
+
+          raw = open(sys.argv[1], 'rb').read(24)
+          if raw[:8] != b'\x89PNG\r\n\x1a\n':
+              raise SystemExit('Social image is not PNG')
+          width, height = struct.unpack('>II', raw[16:24])
+          print(f'social image dimensions={width}x{height}')
+          if (width, height) != (1200, 630):
+              raise SystemExit('Unexpected social image dimensions')
+          PY
 
       - name: Missing routes serve branded noindex 404
         shell: bash
