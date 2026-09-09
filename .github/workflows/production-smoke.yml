@@ -79,7 +79,7 @@ jobs:
             *) echo "Unexpected www redirect: $location"; exit 1 ;;
           esac
 
-      - name: Production security headers are present
+      - name: Production security headers are strict
         shell: bash
         run: |
           set -euo pipefail
@@ -88,6 +88,13 @@ jobs:
           grep -qi '^strict-transport-security:' "$headers"
           grep -qi '^content-security-policy:' "$headers"
           grep -qi '^x-content-type-options:[[:space:]]*nosniff' "$headers"
+          csp="$(awk 'BEGIN{IGNORECASE=1} /^content-security-policy:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
+          echo "csp=$csp"
+          echo "$csp" | grep -Fq "style-src 'self'"
+          if echo "$csp" | grep -Fqi "'unsafe-inline'"; then
+            echo 'Production CSP unexpectedly allows unsafe-inline.'
+            exit 1
+          fi
 
       - name: Robots sitemap and public assets are reachable
         shell: bash
@@ -100,6 +107,7 @@ jobs:
           grep -q 'https://ainosventures.com/en/' "$tmp/sitemap"
           grep -q 'https://ainosventures.com/tr/' "$tmp/sitemap"
           for url in \
+            https://ainosventures.com/assets/css/site-enhancements.css \
             https://ainosventures.com/assets/css/team-tuning.css \
             https://ainosventures.com/assets/images/tunca-web.jpg \
             https://ainosventures.com/assets/images/nidan-web.jpg; do
@@ -108,14 +116,22 @@ jobs:
             test "$status" = '200'
           done
 
-      - name: Missing routes return HTTP 404
+      - name: Missing routes serve branded noindex 404
         shell: bash
         run: |
           set -euo pipefail
-          status="$(curl -LsS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
+          body="$(mktemp)"
+          status="$(curl -LsS --connect-timeout 10 --max-time 30 -o "$body" -w '%{http_code}' https://ainosventures.com/__ainos_smoke_not_found__)"
           echo "final status=$status"
           test "$status" = '404'
-          grep -qi 'noindex' 404.html
+          grep -q 'Page not found\.' "$body"
+          grep -q 'Türkçe Ana Sayfa' "$body"
+          grep -q '/assets/css/site-enhancements.css' "$body"
+          grep -qi 'name="robots" content="noindex"' "$body"
+          if grep -qi ' style=' "$body"; then
+            echo 'Served 404 unexpectedly contains inline styles.'
+            exit 1
+          fi
 
       - name: Legacy staging alias is non-indexable
         shell: bash
