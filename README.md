@@ -22,8 +22,9 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Official Ainos monogram favicon / navigation mark
 - Accessible mobile navigation with keyboard focus management
 - Skip-to-content support and reduced-motion handling
-- Founder headshots and LinkedIn links
-- Company LinkedIn and canonical website email CTA
+- Founder headshots and LinkedIn links are present directly in static HTML
+- Company LinkedIn and canonical website email CTA are present directly in static HTML
+- Presentation/responsive enhancement rules live in CSS; `main.js` is limited to interaction/behavior
 
 ## Brand / positioning
 - Tagline: `Strategy · Capital · Partnership.`
@@ -60,6 +61,27 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] `/en/` confirmed indexed by Google
 - [x] `/tr/` confirmed indexed by Google
 
+## V1.1 maintainability — completed
+The static source now matches the intended public output rather than relying on runtime JavaScript injection or CSS-only hiding for core content.
+
+Completed:
+- [x] Removed unpublished Ainos Intelligence navigation and section markup from EN/TR source
+- [x] Removed internal network-note/release-note copy from EN/TR source
+- [x] Baked `contact@ainosventures.com` and company LinkedIn directly into EN/TR HTML
+- [x] Baked founder photos, founder LinkedIn links and official monogram directly into EN/TR HTML
+- [x] Moved presentation/responsive runtime styles from `main.js` into `assets/css/site-enhancements.css`
+- [x] Removed V1 hide rules from `assets/css/team-tuning.css`
+- [x] Reduced `main.js` to mobile navigation, accessibility interaction, reveal animation and current-year behavior
+- [x] Extended `scripts/site_check.py` and `scripts/release_check.py` to protect raw-source/static wiring
+- [x] Site quality PASS
+- [x] Production smoke PASS
+- [x] Responsive visual QA PASS after the visual/source refactor
+- [x] Desktop and mobile EN/TR screenshots reviewed with no visible regression
+
+Primary implementation commits:
+- `7c284d57a0df841cf86852542fddbe70f1a047e2` — static source / CSS / JS refactor
+- `1ad01f2647afe8400bec610665ce223c15f2a563` — release-check alignment for static contact wiring
+
 ## Monitoring
 Search Console tracking is maintained in Issue #4.
 
@@ -69,21 +91,6 @@ Current state:
 - Search Console initially reported `Couldn't fetch`; monitor for Google-side re-fetch / crawl status
 - Both language pages are already indexed and served over HTTPS
 - Analytics is intentionally **not enabled for V1**; revisit only if a concrete measurement need emerges
-
-## Next engineering pass — V1.1
-The public browser experience is correct, but some V1 presentation/content changes are currently applied through runtime JavaScript or CSS hiding. The next maintainability pass should make the static source itself match the intended public output.
-
-Planned direction:
-- Remove deferred Ainos Intelligence markup/navigation from EN/TR source until content is actually published
-- Remove internal network-note copy from EN/TR source rather than hiding it with CSS
-- Bake `contact@ainosventures.com` and company LinkedIn directly into HTML
-- Bake founder photos / profile links and official monogram into static HTML where practical
-- Move presentation-only runtime CSS out of `main.js` into stylesheet source
-- Keep JavaScript focused on interaction/behavior (mobile navigation, reveal, current year)
-- Extend CI to assert that retired/deferred raw-source content cannot reappear
-- Re-run production smoke, site quality and responsive visual QA after cleanup
-
-Track this work in the V1.1 GitHub issue/backlog.
 
 ## Explicitly deferred
 - Social sharing / OG image
