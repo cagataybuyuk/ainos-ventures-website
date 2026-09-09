@@ -1,6 +1,9 @@
 :root{--ink:#1c1c1c;--dark:#1c1c1c;--dark-2:#262624}
 [id]{scroll-margin-top:96px}
 .hero-main,.hero-side,.cap,.work,.panel,.person>*{min-width:0}
+.reveal{opacity:1;transform:none}
+html.js .reveal{opacity:0;transform:translateY(12px)}
+html.js .reveal.visible{opacity:1;transform:none}
 .brand .mark:before,.brand .mark:after{display:none!important}
 .brand .mark{width:29px;height:31px;display:grid;place-items:center}
 .brand-mark-img{display:block;width:26px;height:28px;object-fit:contain}
@@ -32,6 +35,10 @@
 }
 
 @media(max-width:900px){
+  .nav-inner{flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+  .nav-links{display:flex;order:3;width:100%;gap:16px;overflow-x:auto;padding:10px 0 2px;border-top:1px solid var(--line);white-space:nowrap;scrollbar-width:thin}
+  html.js .nav-inner{flex-wrap:nowrap;padding-top:0;padding-bottom:0}
+  html.js .nav-links{display:none}
   .mobile-menu-toggle{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;margin-left:auto;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.34);color:var(--ink);cursor:pointer;flex:0 0 auto}
   .mobile-menu-toggle span,.mobile-menu-toggle span:before,.mobile-menu-toggle span:after{display:block;width:15px;height:1px;background:currentColor;position:relative;transition:.18s ease}
   .mobile-menu-toggle span:before,.mobile-menu-toggle span:after{content:'';position:absolute;left:0}
