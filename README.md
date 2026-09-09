@@ -2,63 +2,97 @@
 
 Production repository for the bilingual Ainos Ventures corporate website.
 
+> **Project scope:** this repository tracks website work only — product/content changes, GitHub/Vercel delivery, domain/SEO, QA and website-specific brand implementation. Corporate decks, Qatar/GCC business development and other Ainos Ventures workstreams are out of scope here.
+
+## Production
+- Canonical domain: `https://ainosventures.com/`
+- English: `https://ainosventures.com/en/`
+- Turkish: `https://ainosventures.com/tr/`
+- `www.ainosventures.com` redirects to the apex domain
+- GitHub `main` is the source of truth; Vercel deploys from the repository
+
 ## Current architecture
 - Static HTML / CSS / vanilla JavaScript
-- English route: `/en/`
-- Turkish route: `/tr/`
-- Shared visual system and responsive layout
-- Canonical + hreflang metadata
+- Root `/` permanently redirects to `/en/`
+- Shared bilingual visual system
+- Canonical + `hreflang` metadata
 - `robots.txt` + bilingual `sitemap.xml`
-- Vercel deployment config
-- Baseline security headers
-- Branded 404 page
+- Vercel routing, caching and security headers
+- Branded 404 page with `noindex`
 - Official Ainos monogram favicon / navigation mark
 - Accessible mobile navigation with keyboard focus management
 - Skip-to-content support and reduced-motion handling
-- Automated GitHub Actions site-quality checks
-- Automated bilingual responsive visual QA at 1440 / 1024 / 768 / 390 / 360 px
+- Founder headshots and LinkedIn links
+- Company LinkedIn and canonical website email CTA
 
-## Approved positioning / brand direction
+## Brand / positioning
 - Tagline: `Strategy · Capital · Partnership.`
 - Warm ivory / off-white background
-- Charcoal typography (`#1C1C1C` reference)
-- Minimal editorial visual language
-- Official vector logo package received
+- Charcoal typography (`#1C1C1C` production reference)
+- Minimal, editorial, senior visual language
+- Positioning: strategy + finance + capital + partnerships + execution
+- Public founders:
+  - Tunca Cingöz — Co-Founder
+  - Nidan Akmanoğlu — Co-Founder
+- Public Current Focus:
+  - Energy & Infrastructure
+  - Industrial & Technology
+  - Consumer & Hospitality
+  - Digital Assets & Technology
+- Primary website contact: `contact@ainosventures.com`
 
-## Milestone status
-- [x] Milestone 1 — Production shell
-- [x] Milestone 2 — Production Candidate Home
-- [x] Baseline technical hardening and CI quality gate
-- [x] Final core-team roster confirmed: Tunca Cingöz — Co-Founder; Nidan Akmanoğlu — Co-Founder
-- [x] Mert Özel removed from EN/TR source and core-team layout rebalanced
-- [x] Replace Selected Work / deal figures with Current Focus
-- [x] Current Focus approved categories: Energy & Infrastructure; Industrial & Technology; Consumer & Hospitality; Digital Assets & Technology
-- [x] Public contact route confirmed; website uses `contact@ainosventures.com`
-- [x] Personal LinkedIn profiles received for both co-founders
-- [x] Official Ainos Ventures company LinkedIn linked from Contact
-- [x] Official monogram applied to navigation and favicon
-- [x] Headshot mapping confirmed: Nidan = photo 1; Tunca = photo 2
-- [x] Founder headshots uploaded and published in centered responsive team cards
-- [x] Founder role summaries aligned to responsibilities at Ainos Ventures
-- [x] Accessibility / keyboard-navigation code pass
-- [x] Custom domain connected: `ainosventures.com`; `www` redirects to apex
-- [x] Visual responsive QA — EN/TR hero, Current Focus and Team reviewed at 1440 / 1024 / 768 / 390 / 360 px
-- [ ] Production launch QA
-- [ ] Final technical release checklist
+## Release status — V1
+- [x] Production shell and bilingual routes
+- [x] Final core-team roster and founder bios
+- [x] Founder headshots and LinkedIn links
+- [x] Official monogram / favicon
+- [x] Current Focus replaced retired Selected Work / public deal figures
+- [x] Responsive QA at 1440 / 1024 / 768 / 390 / 360 px for EN/TR
+- [x] Accessibility / keyboard-navigation pass
+- [x] Canonical domain and `www` redirect
+- [x] SEO canonical / hreflang / robots / sitemap checks
+- [x] Security-header and caching pass
+- [x] Unknown-route 404 behavior
+- [x] Production smoke QA
+- [x] Site-quality CI
+- [x] Responsive visual QA
+- [x] Google Search Console Domain property verified
+- [x] `/en/` confirmed indexed by Google
+- [x] `/tr/` confirmed indexed by Google
 
-## Remaining stakeholder inputs / decisions
-- [ ] Final factual bio copy approval after LinkedIn/background review
+## Monitoring
+Search Console tracking is maintained in Issue #4.
+
+Current state:
+- Sitemap submitted to Search Console
+- Sitemap is publicly reachable and contains both canonical language URLs
+- Search Console initially reported `Couldn't fetch`; monitor for Google-side re-fetch / crawl status
+- Both language pages are already indexed and served over HTTPS
+- Analytics is intentionally **not enabled for V1**; revisit only if a concrete measurement need emerges
+
+## Next engineering pass — V1.1
+The public browser experience is correct, but some V1 presentation/content changes are currently applied through runtime JavaScript or CSS hiding. The next maintainability pass should make the static source itself match the intended public output.
+
+Planned direction:
+- Remove deferred Ainos Intelligence markup/navigation from EN/TR source until content is actually published
+- Remove internal network-note copy from EN/TR source rather than hiding it with CSS
+- Bake `contact@ainosventures.com` and company LinkedIn directly into HTML
+- Bake founder photos / profile links and official monogram into static HTML where practical
+- Move presentation-only runtime CSS out of `main.js` into stylesheet source
+- Keep JavaScript focused on interaction/behavior (mobile navigation, reveal, current year)
+- Extend CI to assert that retired/deferred raw-source content cannot reappear
+- Re-run production smoke, site quality and responsive visual QA after cleanup
+
+Track this work in the V1.1 GitHub issue/backlog.
 
 ## Explicitly deferred
 - Social sharing / OG image
 - First Ainos Intelligence article or brief
-- Privacy / cookie setup until analytics and form setup are finalised
-
-`info@ainosventures.com` is also available as a secondary company inbox.
-
-## Current production / staging
-Production: `https://ainosventures.com/`
-Staging: `https://ainos-ventures-website.vercel.app/en/`
+- Analytics
+- Privacy / cookie work tied to future analytics or form functionality
+- Contact form / backend
 
 ## Working method
-GitHub is the source of truth. Changes are committed to the repository and automatically deployed to Vercel for review. GitHub Actions validates core site structure, language metadata, anchors, local assets, sitemap, JavaScript syntax, Vercel configuration, approved focus content, accessibility wiring, brand/contact/team wiring and 404 indexing rules on each push and pull request. A separate responsive visual workflow uses headless Chrome to capture EN and TR hero, Current Focus and Team views at five target viewport widths for visual regression review.
+GitHub is the source of truth for documentation, backlog and code. Website work should be documented in issues before or alongside implementation. Changes are committed to the repository and automatically deployed to Vercel. GitHub Actions protect the release with site-quality, production-smoke and bilingual responsive-visual QA checks.
+
+For future work, keep public website claims conservative and evidence-based; do not reintroduce retired deal figures or unpublished/placeholder content without an explicit content decision.
