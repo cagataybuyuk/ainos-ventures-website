@@ -68,9 +68,22 @@ for lang in ("en", "tr"):
     for required in (
         "mailto:contact@ainosventures.com",
         "https://www.linkedin.com/company/ainos-ventures/",
+        'itemtype="https://schema.org/Organization"',
+        'itemid="https://ainosventures.com/#organization"',
+        'itemprop="logo"',
+        'itemprop="legalName"',
+        'itemprop="email"',
+        'itemprop="sameAs"',
     ):
         if required not in text:
-            ERRORS.append(f"/{lang}/ missing static production contact wiring: {required}")
+            ERRORS.append(f"/{lang}/ missing static production/Organization wiring: {required}")
+
+    expected_locale = 'en_US' if lang == 'en' else 'tr_TR'
+    expected_alternate = 'tr_TR' if lang == 'en' else 'en_US'
+    if f'<meta property="og:locale" content="{expected_locale}">' not in text:
+        ERRORS.append(f"/{lang}/ missing expected og:locale {expected_locale}")
+    if f'<meta property="og:locale:alternate" content="{expected_alternate}">' not in text:
+        ERRORS.append(f"/{lang}/ missing expected alternate locale {expected_alternate}")
 
 root_html = (ROOT / "index.html").read_text(encoding="utf-8") if (ROOT / "index.html").exists() else ""
 if "/en/" not in root_html:
@@ -80,6 +93,19 @@ not_found = (ROOT / "404.html").read_text(encoding="utf-8") if (ROOT / "404.html
 if "noindex" not in not_found.lower():
     ERRORS.append("404 page must remain noindex")
 
+main_js = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
+if "document.documentElement.classList.add('js')" not in main_js:
+    ERRORS.append("main.js must opt the document into JavaScript-enhanced presentation")
+
+enhancements_css = (ROOT / "assets/css/site-enhancements.css").read_text(encoding="utf-8") if (ROOT / "assets/css/site-enhancements.css").exists() else ""
+for required in (
+    ".reveal{opacity:1;transform:none}",
+    "html.js .reveal{opacity:0;transform:translateY(12px)}",
+    "html.js .nav-links{display:none}",
+):
+    if required not in enhancements_css:
+        ERRORS.append(f"Missing progressive enhancement release wiring: {required}")
+
 if ERRORS:
     print("RELEASE CHECK FAILED")
     for error in ERRORS:
@@ -87,4 +113,4 @@ if ERRORS:
     sys.exit(1)
 
 print("RELEASE CHECK PASSED")
-print("Verified production redirect, canonical host, staging noindex, security headers, responsive stylesheets, static contact wiring, asset caching and 404 indexing policy.")
+print("Verified production redirect, canonical host, staging noindex, security headers, progressive enhancement, Organization semantics, bilingual social locales, responsive stylesheets, static contact wiring, asset caching and 404 indexing policy.")
