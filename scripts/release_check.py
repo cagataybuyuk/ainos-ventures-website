@@ -34,6 +34,12 @@ else:
         if not global_map.get(required):
             ERRORS.append(f"Missing production security header: {required}")
 
+    csp = global_map.get("Content-Security-Policy") or ""
+    if "style-src 'self'" not in csp:
+        ERRORS.append("Production CSP must restrict styles to self-hosted sources")
+    if "'unsafe-inline'" in csp:
+        ERRORS.append("Production CSP must not allow unsafe-inline")
+
     staging_rule = next((
         h for h in headers
         if any(rule.get("type") == "host" and rule.get("value") == "ainos-ventures-website.vercel.app" for rule in h.get("has", []))
@@ -92,6 +98,17 @@ if "/en/" not in root_html:
 not_found = (ROOT / "404.html").read_text(encoding="utf-8") if (ROOT / "404.html").exists() else ""
 if "noindex" not in not_found.lower():
     ERRORS.append("404 page must remain noindex")
+for required in (
+    "/assets/css/site-enhancements.css",
+    'class="hero-grid not-found-grid"',
+    'class="serif not-found-title"',
+    'hreflang="en"',
+    'hreflang="tr"',
+):
+    if required not in not_found:
+        ERRORS.append(f"404 page missing responsive/language release wiring: {required}")
+if " style=" in not_found.lower() or "<style" in not_found.lower():
+    ERRORS.append("404 page must not use inline styles under the strict CSP")
 
 main_js = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
 if "document.documentElement.classList.add('js')" not in main_js:
@@ -102,9 +119,10 @@ for required in (
     ".reveal{opacity:1;transform:none}",
     "html.js .reveal{opacity:0;transform:translateY(12px)}",
     "html.js .nav-links{display:none}",
+    ".not-found-grid{min-height:620px;grid-template-columns:1fr .55fr}",
 ):
     if required not in enhancements_css:
-        ERRORS.append(f"Missing progressive enhancement release wiring: {required}")
+        ERRORS.append(f"Missing progressive/404 release wiring: {required}")
 
 if ERRORS:
     print("RELEASE CHECK FAILED")
@@ -113,4 +131,4 @@ if ERRORS:
     sys.exit(1)
 
 print("RELEASE CHECK PASSED")
-print("Verified production redirect, canonical host, staging noindex, security headers, progressive enhancement, Organization semantics, bilingual social locales, responsive stylesheets, static contact wiring, asset caching and 404 indexing policy.")
+print("Verified production redirect, canonical host, staging noindex, strict self-hosted CSP, progressive enhancement, Organization semantics, bilingual social locales, responsive stylesheets, static contact wiring, asset caching and responsive/noindex 404 policy.")
