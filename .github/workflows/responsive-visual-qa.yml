@@ -7,6 +7,7 @@ on:
     paths:
       - 'en/**'
       - 'tr/**'
+      - '404.html'
       - 'assets/**'
       - '.github/workflows/responsive-visual-qa.yml'
 
@@ -45,7 +46,7 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/ainos-http.log 2>&1 &
           echo $! > /tmp/ainos-http.pid
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:4173/en/ >/dev/null && curl -fsS http://127.0.0.1:4173/tr/ >/dev/null; then
+            if curl -fsS http://127.0.0.1:4173/en/ >/dev/null && curl -fsS http://127.0.0.1:4173/tr/ >/dev/null && curl -fsS http://127.0.0.1:4173/404.html >/dev/null; then
               exit 0
             fi
             sleep 1
@@ -158,6 +159,19 @@ jobs:
 
                   await page.close();
                 }
+              }
+
+              for (const width of [1440, 360]) {
+                const page = await browser.newPage();
+                await page.setViewport({ width, height: 1000, deviceScaleFactor: 1 });
+                await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+                await page.goto('http://127.0.0.1:4173/404.html', { waitUntil: 'networkidle0' });
+                await wait(150);
+                await page.screenshot({
+                  path: path.join('qa-responsive', `404-${width}.png`),
+                  fullPage: false
+                });
+                await page.close();
               }
             } finally {
               await browser.close();
