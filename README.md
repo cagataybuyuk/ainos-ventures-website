@@ -28,6 +28,7 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Schema.org `Organization` microdata using current public company facts
 - Founder headshots and LinkedIn links
 - Company LinkedIn and canonical website email CTA
+- Production smoke asserts deployed CSP and branded 404 behavior, not only repository configuration
 
 ## Brand / positioning
 - Tagline: `Strategy · Capital · Partnership.`
@@ -91,6 +92,17 @@ Detailed V1.2 audit: `docs/V1_2_POST_LAUNCH_AUDIT.md`
 - [x] Vercel deployment success
 
 Detailed V1.3 audit: `docs/V1_3_CSP_404_AUDIT.md`
+
+### V1.4 — production contract assertions
+- [x] Assert the live CSP contains `style-src 'self'`
+- [x] Assert the live CSP does not contain `unsafe-inline`
+- [x] Assert a real missing route returns the branded Ainos 404 body
+- [x] Assert the served 404 remains `noindex`, uses shared CSS and contains no inline styles
+- [x] Preserve root/www redirects, EN/TR, sitemap/assets and staging checks
+- [x] Site quality / production smoke PASS
+- [x] Vercel deployment success
+
+Detailed V1.4 notes: `docs/V1_4_PRODUCTION_CONTRACTS.md`
 
 ## Monitoring
 Search Console tracking is maintained in Issue #4.
