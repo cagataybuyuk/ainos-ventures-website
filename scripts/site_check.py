@@ -122,6 +122,13 @@ for path, lang in PAGES.items():
     if page.og.get("og:url") != expected_canonical:
         ERRORS.append(f"{rel}: og:url should match canonical")
 
+    expected_og_locale = "en_US" if lang == "en" else "tr_TR"
+    expected_og_alternate = "tr_TR" if lang == "en" else "en_US"
+    if page.og.get("og:locale") != expected_og_locale:
+        ERRORS.append(f"{rel}: og:locale should be {expected_og_locale}")
+    if page.og.get("og:locale:alternate") != expected_og_alternate:
+        ERRORS.append(f"{rel}: og:locale:alternate should be {expected_og_alternate}")
+
     if not page.meta.get("twitter:card"):
         ERRORS.append(f"{rel}: missing twitter:card")
 
@@ -191,6 +198,20 @@ for path, lang in PAGES.items():
         if required not in text:
             ERRORS.append(f"{rel}: missing static production wiring: {required}")
 
+    required_org_semantics = (
+        'itemtype="https://schema.org/Organization"',
+        'itemid="https://ainosventures.com/#organization"',
+        'itemprop="url"',
+        'itemprop="logo"',
+        'itemprop="name"',
+        'itemprop="legalName"',
+        'itemprop="email"',
+        'itemprop="sameAs"',
+    )
+    for required in required_org_semantics:
+        if required not in text:
+            ERRORS.append(f"{rel}: missing Organization semantic wiring: {required}")
+
 for required in [
     "robots.txt",
     "sitemap.xml",
@@ -224,6 +245,7 @@ if (ROOT / "404.html").exists():
 
 main_js = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
 for required_js in (
+    "document.documentElement.classList.add('js')",
     "prefers-reduced-motion",
     "aria-expanded",
     "IntersectionObserver",
@@ -246,6 +268,16 @@ for forbidden_js in (
     if forbidden_js in main_js:
         ERRORS.append(f"main.js should not own static presentation/content wiring: {forbidden_js}")
 
+enhancements_css = (ROOT / "assets/css/site-enhancements.css").read_text(encoding="utf-8") if (ROOT / "assets/css/site-enhancements.css").exists() else ""
+for required_css in (
+    ".reveal{opacity:1;transform:none}",
+    "html.js .reveal{opacity:0;transform:translateY(12px)}",
+    "html.js .reveal.visible{opacity:1;transform:none}",
+    "html.js .nav-links{display:none}",
+):
+    if required_css not in enhancements_css:
+        ERRORS.append(f"site-enhancements.css missing progressive-enhancement guardrail: {required_css}")
+
 for warning in WARNINGS:
     print(f"WARNING: {warning}")
 
@@ -256,4 +288,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, static brand/contact/team wiring, responsive tuning, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, progressive enhancement, Organization semantics, deployment, accessibility, static brand/contact/team wiring, responsive tuning, SEO and asset requirements.")
