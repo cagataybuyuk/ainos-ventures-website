@@ -18,20 +18,22 @@
   <meta property="og:site_name" content="Ainos Ventures">
   <meta name="twitter:card" content="summary">
   <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/site-enhancements.css">
   <link rel="stylesheet" href="/assets/css/team-tuning.css">
   <script defer src="/assets/js/main.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="/en/" aria-label="Ainos Ventures home"><span class="mark" aria-hidden="true"></span><span class="brand-name">AINOS VENTURES</span></a>
+    <a class="brand" href="/en/" aria-label="Ainos Ventures home"><span class="mark" aria-hidden="true"><img class="brand-mark-img" src="/assets/images/ainos-monogram.svg" alt=""></span><span class="brand-name">AINOS VENTURES</span></a>
     <nav class="nav-links" aria-label="Primary navigation">
-      <a href="#what">What We Do</a><a href="#focus">Current Focus</a><a href="#team">Team</a><a href="#insights">Insights</a><a href="#contact">Contact</a>
+      <a href="#what">What We Do</a><a href="#focus">Current Focus</a><a href="#team">Team</a><a href="#contact">Contact</a>
     </nav>
-    <a class="lang-link" href="/tr/" hreflang="tr" lang="tr">TR</a>
+    <a class="lang-link" href="/tr/" hreflang="tr" lang="tr" aria-label="Türkçeye geç">TR</a>
   </div>
 </header>
-<main>
+<main id="main-content">
   <section class="hero">
     <div class="wrap hero-shell">
       <div class="hero-topline"><span>Ainos Ventures · Türkiye</span><span>Strategy · Finance · Capital · Execution</span></div>
@@ -133,19 +135,17 @@
       <h2 class="serif">Senior expertise. Connected execution.</h2>
       <p class="lead">Ainos brings together finance, strategy, investment, technology and business-development experience around complex mandates, supported by an international network of operators, investors and partners.</p>
       <div class="team-grid team-grid-two">
-        <article class="person reveal"><div class="person-no">01</div><h3 class="serif">Tunca Cingöz</h3><div class="person-role">Co-Founder</div><p>Brings an entrepreneurial and commercial perspective to strategy, business development, investments and long-term partnerships.</p><div class="person-tags"><span class="person-tag">Strategy</span><span class="person-tag">Business Development</span><span class="person-tag">Investments</span></div></article>
-        <article class="person reveal"><div class="person-no">02</div><h3 class="serif">Nidan Akmanoğlu</h3><div class="person-role">Co-Founder</div><p>Brings a financial and strategic perspective to transactions, capital structuring, transformation and value creation.</p><div class="person-tags"><span class="person-tag">Finance</span><span class="person-tag">Transactions</span><span class="person-tag">Transformation</span></div></article>
+        <article class="person reveal">
+          <div class="person-photo-wrap"><img class="person-photo" src="/assets/images/tunca-web.jpg" alt="" loading="lazy" decoding="async" width="600" height="800" data-person="Tunca Cingöz"></div>
+          <div class="person-no">01</div><h3 class="serif">Tunca Cingöz</h3><div class="person-role">Co-Founder</div><p>Brings an entrepreneurial and commercial perspective to strategy, business development, investments and long-term partnerships.</p><div class="person-tags"><span class="person-tag">Strategy</span><span class="person-tag">Business Development</span><span class="person-tag">Investments</span></div>
+          <a class="person-link" href="https://www.linkedin.com/in/tunca-cingöz-429592a/" target="_blank" rel="noopener noreferrer" aria-label="Tunca Cingöz LinkedIn profile, opens in a new tab">LinkedIn ↗</a>
+        </article>
+        <article class="person reveal">
+          <div class="person-photo-wrap"><img class="person-photo" src="/assets/images/nidan-web.jpg" alt="" loading="lazy" decoding="async" width="600" height="784" data-person="Nidan Akmanoğlu"></div>
+          <div class="person-no">02</div><h3 class="serif">Nidan Akmanoğlu</h3><div class="person-role">Co-Founder</div><p>Brings a financial and strategic perspective to transactions, capital structuring, transformation and value creation.</p><div class="person-tags"><span class="person-tag">Finance</span><span class="person-tag">Transactions</span><span class="person-tag">Transformation</span></div>
+          <a class="person-link" href="https://www.linkedin.com/in/nidan-akmanoglu-163b6918/" target="_blank" rel="noopener noreferrer" aria-label="Nidan Akmanoğlu LinkedIn profile, opens in a new tab">LinkedIn ↗</a>
+        </article>
       </div>
-      <p class="network-note">The first website release presents the core team. Board and wider network profiles can be added as roles and public positioning are finalised.</p>
-    </div>
-  </section>
-
-  <section id="insights">
-    <div class="wrap">
-      <div class="section-kicker">Ainos Intelligence</div>
-      <h2 class="serif">Few ideas. High signal.</h2>
-      <p class="lead">Selected perspectives on investment, markets, technology and execution — published when we have something worth saying.</p>
-      <div class="insight-card reveal"><div><div class="section-kicker">Editorial direction</div><h3 class="serif">Short, senior-level opportunity and market briefs.</h3><p>Ainos Intelligence will combine a small number of relevant data points with Ainos perspective and a practical opportunity map. The objective is not publishing frequency; it is usefulness.</p></div><div class="insight-badge">In development</div></div>
     </div>
   </section>
 
@@ -154,7 +154,10 @@
       <div class="section-kicker">Contact</div>
       <h2 class="serif">Discuss an opportunity.</h2>
       <p>If you are evaluating an investment, building a business, entering a new market or looking for the right capital or strategic partner, we would be glad to hear from you.</p>
-      <a class="btn" href="mailto:info@ainosventures.com">info@ainosventures.com</a>
+      <div class="contact-actions">
+        <a class="btn" href="mailto:contact@ainosventures.com" aria-label="Email Ainos Ventures">contact@ainosventures.com</a>
+        <a class="btn company-link" href="https://www.linkedin.com/company/ainos-ventures/" target="_blank" rel="noopener noreferrer" aria-label="Open Ainos Ventures on LinkedIn in a new tab">LinkedIn ↗</a>
+      </div>
     </div>
   </section>
 </main>

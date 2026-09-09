@@ -5,14 +5,6 @@
   margin-right:auto !important;
 }
 
-/* V1 editorial polish: keep public launch concise until deferred content is ready. */
-.team-grid-two + .network-note,
-#insights,
-.nav-links a[href="#insights"],
-.mobile-menu a[href="#insights"]{
-  display:none !important;
-}
-
 .person-photo[data-person='Nidan Akmanoğlu']{
   object-position:center 25% !important;
   transform:scale(1.28) !important;

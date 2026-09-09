@@ -142,8 +142,9 @@ for path, lang in PAGES.items():
         if not asset_path.exists():
             ERRORS.append(f"{rel}: missing asset {asset}")
 
-    if "/assets/css/team-tuning.css" not in page.hrefs:
-        ERRORS.append(f"{rel}: missing responsive team tuning stylesheet")
+    for stylesheet in ("/assets/css/site-enhancements.css", "/assets/css/team-tuning.css"):
+        if stylesheet not in page.hrefs:
+            ERRORS.append(f"{rel}: missing required stylesheet {stylesheet}")
 
     other_lang = "tr" if lang == "en" else "en"
     if f"/{other_lang}/" not in page.hrefs:
@@ -171,12 +172,32 @@ for path, lang in PAGES.items():
         if focus_name not in text:
             ERRORS.append(f"{rel}: missing approved focus area {focus_name}")
 
+    for forbidden in ('id="insights"', 'href="#insights"', 'class="network-note"', "Ainos Intelligence", "info@ainosventures.com"):
+        if forbidden in text:
+            ERRORS.append(f"{rel}: deferred/internal raw-source content must not remain: {forbidden}")
+
+    required_static_wiring = (
+        "mailto:contact@ainosventures.com",
+        "https://www.linkedin.com/company/ainos-ventures/",
+        "https://www.linkedin.com/in/tunca-cingöz-429592a/",
+        "https://www.linkedin.com/in/nidan-akmanoglu-163b6918/",
+        "/assets/images/ainos-monogram.svg",
+        "/assets/images/tunca-web.jpg",
+        "/assets/images/nidan-web.jpg",
+        'class="skip-link"',
+        'id="main-content"',
+    )
+    for required in required_static_wiring:
+        if required not in text:
+            ERRORS.append(f"{rel}: missing static production wiring: {required}")
+
 for required in [
     "robots.txt",
     "sitemap.xml",
     "vercel.json",
     "404.html",
     "assets/css/styles.css",
+    "assets/css/site-enhancements.css",
     "assets/css/team-tuning.css",
     "assets/js/main.js",
     "assets/images/favicon.svg",
@@ -203,25 +224,27 @@ if (ROOT / "404.html").exists():
 
 main_js = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
 for required_js in (
+    "prefers-reduced-motion",
+    "aria-expanded",
+    "IntersectionObserver",
+    "mobile-menu-toggle",
+    "data-current-year",
+):
+    if required_js not in main_js:
+        ERRORS.append(f"main.js missing required interaction/accessibility wiring: {required_js}")
+
+for forbidden_js in (
     "contact@ainosventures.com",
     "ainos-monogram.svg",
     "nidan-web.jpg",
     "tunca-web.jpg",
-    "Skip to main content",
-    "Ana içeriğe geç",
-    "prefers-reduced-motion",
-    "aria-expanded",
     "https://www.linkedin.com/company/ainos-ventures/",
+    "teamProfiles",
+    "runtimeStyle",
+    "createElement('style')",
 ):
-    if required_js not in main_js:
-        ERRORS.append(f"main.js missing required production/accessibility/team wiring: {required_js}")
-
-for profile in (
-    "https://www.linkedin.com/in/tunca-cingöz-429592a/",
-    "https://www.linkedin.com/in/nidan-akmanoglu-163b6918/",
-):
-    if profile not in main_js:
-        ERRORS.append(f"main.js missing approved LinkedIn profile: {profile}")
+    if forbidden_js in main_js:
+        ERRORS.append(f"main.js should not own static presentation/content wiring: {forbidden_js}")
 
 for warning in WARNINGS:
     print(f"WARNING: {warning}")
@@ -233,4 +256,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, brand/contact/team wiring, responsive tuning, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, deployment, accessibility, static brand/contact/team wiring, responsive tuning, SEO and asset requirements.")
