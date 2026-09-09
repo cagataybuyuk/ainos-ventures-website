@@ -238,10 +238,23 @@ robots = (ROOT / "robots.txt").read_text(encoding="utf-8") if (ROOT / "robots.tx
 if "https://ainosventures.com/sitemap.xml" not in robots:
     ERRORS.append("robots.txt does not reference the production sitemap")
 
-if (ROOT / "404.html").exists():
-    p404 = parse(ROOT / "404.html")
+not_found_path = ROOT / "404.html"
+if not_found_path.exists():
+    not_found = not_found_path.read_text(encoding="utf-8")
+    p404 = parse(not_found_path)
     if not p404.robots or "noindex" not in p404.robots.lower():
         ERRORS.append("404.html must be noindex")
+    if "/assets/css/site-enhancements.css" not in p404.hrefs:
+        ERRORS.append("404.html must load the shared enhancement stylesheet")
+    for required in ('class="hero-grid not-found-grid"', 'class="serif not-found-title"', 'hreflang="en"', 'hreflang="tr"'):
+        if required not in not_found:
+            ERRORS.append(f"404.html missing responsive/language wiring: {required}")
+
+for html_path in (ROOT / "index.html", ROOT / "en" / "index.html", ROOT / "tr" / "index.html", ROOT / "404.html"):
+    if html_path.exists():
+        html_text = html_path.read_text(encoding="utf-8").lower()
+        if " style=" in html_text or "<style" in html_text:
+            ERRORS.append(f"{html_path.relative_to(ROOT)}: inline styles are forbidden by the production CSP")
 
 main_js = (ROOT / "assets/js/main.js").read_text(encoding="utf-8") if (ROOT / "assets/js/main.js").exists() else ""
 for required_js in (
@@ -274,9 +287,11 @@ for required_css in (
     "html.js .reveal{opacity:0;transform:translateY(12px)}",
     "html.js .reveal.visible{opacity:1;transform:none}",
     "html.js .nav-links{display:none}",
+    ".not-found-grid{min-height:620px;grid-template-columns:1fr .55fr}",
+    ".not-found-title{font-size:clamp(54px,7vw,90px)}",
 ):
     if required_css not in enhancements_css:
-        ERRORS.append(f"site-enhancements.css missing progressive-enhancement guardrail: {required_css}")
+        ERRORS.append(f"site-enhancements.css missing progressive/404 guardrail: {required_css}")
 
 for warning in WARNINGS:
     print(f"WARNING: {warning}")
@@ -288,4 +303,4 @@ if ERRORS:
     sys.exit(1)
 
 print("SITE CHECK PASSED")
-print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, progressive enhancement, Organization semantics, deployment, accessibility, static brand/contact/team wiring, responsive tuning, SEO and asset requirements.")
+print(f"Checked {len(PAGES)} language pages plus approved focus content, metadata, navigation, progressive enhancement, Organization semantics, CSP-safe HTML, responsive 404, deployment, accessibility, static brand/contact/team wiring, SEO and asset requirements.")
