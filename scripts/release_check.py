@@ -80,6 +80,12 @@ for lang in ("en", "tr"):
         'itemprop="legalName"',
         'itemprop="email"',
         'itemprop="sameAs"',
+        '<meta property="og:image" content="https://ainosventures.com/assets/images/ainos-social-card.png">',
+        '<meta property="og:image:type" content="image/png">',
+        '<meta property="og:image:width" content="1200">',
+        '<meta property="og:image:height" content="630">',
+        '<meta name="twitter:card" content="summary_large_image">',
+        '<meta name="twitter:image" content="https://ainosventures.com/assets/images/ainos-social-card.png">',
     ):
         if required not in text:
             ERRORS.append(f"/{lang}/ missing static production/Organization wiring: {required}")

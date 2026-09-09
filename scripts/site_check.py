@@ -1,5 +1,6 @@
 from html.parser import HTMLParser
 from pathlib import Path
+import struct
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -115,7 +116,7 @@ for path, lang in PAGES.items():
         if page.alternates.get(hreflang) != expected_url:
             ERRORS.append(f"{rel}: hreflang {hreflang} should be {expected_url}")
 
-    for required_og in ("og:title", "og:description", "og:type", "og:url", "og:site_name"):
+    for required_og in ("og:title", "og:description", "og:type", "og:url", "og:site_name", "og:image", "og:image:type", "og:image:width", "og:image:height", "og:image:alt"):
         if not page.og.get(required_og):
             ERRORS.append(f"{rel}: missing {required_og}")
 
@@ -129,8 +130,18 @@ for path, lang in PAGES.items():
     if page.og.get("og:locale:alternate") != expected_og_alternate:
         ERRORS.append(f"{rel}: og:locale:alternate should be {expected_og_alternate}")
 
-    if not page.meta.get("twitter:card"):
-        ERRORS.append(f"{rel}: missing twitter:card")
+    if page.og.get("og:image") != "https://ainosventures.com/assets/images/ainos-social-card.png":
+        ERRORS.append(f"{rel}: og:image should use canonical social card")
+    if page.og.get("og:image:type") != "image/png":
+        ERRORS.append(f"{rel}: og:image:type should be image/png")
+    if page.og.get("og:image:width") != "1200" or page.og.get("og:image:height") != "630":
+        ERRORS.append(f"{rel}: social image dimensions must be 1200x630")
+    if page.meta.get("twitter:card") != "summary_large_image":
+        ERRORS.append(f"{rel}: twitter:card should be summary_large_image")
+    if page.meta.get("twitter:image") != "https://ainosventures.com/assets/images/ainos-social-card.png":
+        ERRORS.append(f"{rel}: twitter:image should use canonical social card")
+    if not page.meta.get("twitter:image:alt"):
+        ERRORS.append(f"{rel}: missing twitter:image:alt")
 
     if page.robots and "noindex" in page.robots.lower():
         ERRORS.append(f"{rel}: production language pages must be indexable")
@@ -225,6 +236,7 @@ for required in [
     "assets/images/ainos-monogram.svg",
     "assets/images/nidan-web.jpg",
     "assets/images/tunca-web.jpg",
+    "assets/images/ainos-social-card.png",
 ]:
     if not (ROOT / required).exists():
         ERRORS.append(f"Missing required file: {required}")
@@ -233,6 +245,18 @@ sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8") if (ROOT / "sitemap
 for url in ("https://ainosventures.com/en/", "https://ainosventures.com/tr/"):
     if url not in sitemap:
         ERRORS.append(f"sitemap.xml missing {url}")
+
+social_path = ROOT / "assets/images/ainos-social-card.png"
+if social_path.exists():
+    social_raw = social_path.read_bytes()
+    if social_raw[:8] != b"\x89PNG\r\n\x1a\n":
+        ERRORS.append("Social card must be a PNG")
+    elif len(social_raw) < 24:
+        ERRORS.append("Social card PNG is truncated")
+    else:
+        social_width, social_height = struct.unpack(">II", social_raw[16:24])
+        if (social_width, social_height) != (1200, 630):
+            ERRORS.append(f"Social card must be 1200x630, found {social_width}x{social_height}")
 
 robots = (ROOT / "robots.txt").read_text(encoding="utf-8") if (ROOT / "robots.txt").exists() else ""
 if "https://ainosventures.com/sitemap.xml" not in robots:

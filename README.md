@@ -104,6 +104,15 @@ Detailed V1.3 audit: `docs/V1_3_CSP_404_AUDIT.md`
 
 Detailed V1.4 notes: `docs/V1_4_PRODUCTION_CONTRACTS.md`
 
+### V1.5 — social sharing / OG package
+- [x] Added one shared 1200×630 Ainos Ventures social card
+- [x] Added canonical `og:image` metadata to EN/TR
+- [x] Added explicit Open Graph image type/dimensions/alt metadata
+- [x] Upgraded Twitter card metadata to `summary_large_image`
+- [x] Added CI and production-smoke contracts for the image and metadata
+
+Detailed V1.5 notes: `docs/V1_5_SOCIAL_SHARING.md`
+
 ## Monitoring
 Search Console tracking is maintained in Issue #4.
 
@@ -115,7 +124,6 @@ Current state:
 - Analytics is intentionally **not enabled**; revisit only if a concrete measurement need emerges
 
 ## Explicitly deferred
-- Social sharing / OG image
 - First Ainos Intelligence article or brief
 - Analytics
 - Privacy / cookie work tied to future analytics or form functionality
