@@ -1,3 +1,5 @@
+document.documentElement.classList.add('js');
+
 document.addEventListener('DOMContentLoaded',()=>{
   const isTr=document.documentElement.lang==='tr';
   const year=document.querySelector('[data-current-year]');
