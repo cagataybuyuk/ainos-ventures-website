@@ -16,15 +16,17 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Root `/` permanently redirects to `/en/`
 - Shared bilingual visual system
 - Canonical + `hreflang` metadata
+- Bilingual Open Graph locale metadata
 - `robots.txt` + bilingual `sitemap.xml`
 - Vercel routing, caching and security headers
 - Branded 404 page with `noindex`
 - Official Ainos monogram favicon / navigation mark
 - Accessible mobile navigation with keyboard focus management
 - Skip-to-content support and reduced-motion handling
-- Founder headshots and LinkedIn links are present directly in static HTML
-- Company LinkedIn and canonical website email CTA are present directly in static HTML
-- Presentation/responsive enhancement rules live in CSS; `main.js` is limited to interaction/behavior
+- Progressive enhancement: public content/navigation remain usable without JavaScript
+- Schema.org `Organization` microdata using current public company facts
+- Founder headshots and LinkedIn links
+- Company LinkedIn and canonical website email CTA
 
 ## Brand / positioning
 - Tagline: `Strategy · Capital · Partnership.`
@@ -42,7 +44,8 @@ Production repository for the bilingual Ainos Ventures corporate website.
   - Digital Assets & Technology
 - Primary website contact: `contact@ainosventures.com`
 
-## Release status — V1
+## Release status
+### V1 — production launch
 - [x] Production shell and bilingual routes
 - [x] Final core-team roster and founder bios
 - [x] Founder headshots and LinkedIn links
@@ -61,26 +64,21 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] `/en/` confirmed indexed by Google
 - [x] `/tr/` confirmed indexed by Google
 
-## V1.1 maintainability — completed
-The static source now matches the intended public output rather than relying on runtime JavaScript injection or CSS-only hiding for core content.
+### V1.1 — source cleanup / maintainability
+- [x] Removed unpublished Insights/internal release-note markup from raw source
+- [x] Baked brand/contact/team wiring directly into static HTML
+- [x] Moved presentation CSS out of runtime JavaScript
+- [x] Added raw-source CI guardrails
 
-Completed:
-- [x] Removed unpublished Ainos Intelligence navigation and section markup from EN/TR source
-- [x] Removed internal network-note/release-note copy from EN/TR source
-- [x] Baked `contact@ainosventures.com` and company LinkedIn directly into EN/TR HTML
-- [x] Baked founder photos, founder LinkedIn links and official monogram directly into EN/TR HTML
-- [x] Moved presentation/responsive runtime styles from `main.js` into `assets/css/site-enhancements.css`
-- [x] Removed V1 hide rules from `assets/css/team-tuning.css`
-- [x] Reduced `main.js` to mobile navigation, accessibility interaction, reveal animation and current-year behavior
-- [x] Extended `scripts/site_check.py` and `scripts/release_check.py` to protect raw-source/static wiring
-- [x] Site quality PASS
-- [x] Production smoke PASS
-- [x] Responsive visual QA PASS after the visual/source refactor
-- [x] Desktop and mobile EN/TR screenshots reviewed with no visible regression
+### V1.2 — post-launch resilience / search semantics
+- [x] Added no-JavaScript resilience for reveal content and mobile navigation
+- [x] Added explicit browser QA with JavaScript disabled at mobile width
+- [x] Added schema.org `Organization` microdata using public facts only
+- [x] Added EN/TR Open Graph locale metadata
+- [x] Extended site/release CI guardrails
+- [x] Site quality / production smoke / responsive visual QA PASS
 
-Primary implementation commits:
-- `7c284d57a0df841cf86852542fddbe70f1a047e2` — static source / CSS / JS refactor
-- `1ad01f2647afe8400bec610665ce223c15f2a563` — release-check alignment for static contact wiring
+Detailed V1.2 audit: `docs/V1_2_POST_LAUNCH_AUDIT.md`
 
 ## Monitoring
 Search Console tracking is maintained in Issue #4.
@@ -90,7 +88,7 @@ Current state:
 - Sitemap is publicly reachable and contains both canonical language URLs
 - Search Console initially reported `Couldn't fetch`; monitor for Google-side re-fetch / crawl status
 - Both language pages are already indexed and served over HTTPS
-- Analytics is intentionally **not enabled for V1**; revisit only if a concrete measurement need emerges
+- Analytics is intentionally **not enabled**; revisit only if a concrete measurement need emerges
 
 ## Explicitly deferred
 - Social sharing / OG image
