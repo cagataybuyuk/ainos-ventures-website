@@ -19,7 +19,8 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - Bilingual Open Graph locale metadata
 - `robots.txt` + bilingual `sitemap.xml`
 - Vercel routing, caching and security headers
-- Branded 404 page with `noindex`
+- Strict self-hosted Content Security Policy; production HTML does not require inline styles
+- Branded responsive 404 page with `noindex`
 - Official Ainos monogram favicon / navigation mark
 - Accessible mobile navigation with keyboard focus management
 - Skip-to-content support and reduced-motion handling
@@ -79,6 +80,17 @@ Production repository for the bilingual Ainos Ventures corporate website.
 - [x] Site quality / production smoke / responsive visual QA PASS
 
 Detailed V1.2 audit: `docs/V1_2_POST_LAUNCH_AUDIT.md`
+
+### V1.3 — CSP hardening / 404 resilience
+- [x] Removed inline styles from the branded 404 page
+- [x] Moved 404 layout into shared responsive CSS
+- [x] Tightened CSP to `style-src 'self'` with no `unsafe-inline`
+- [x] Added CI guardrails against inline production styles / CSP regression
+- [x] Added 404 desktop/mobile responsive visual QA
+- [x] Site quality / production smoke / responsive visual QA PASS
+- [x] Vercel deployment success
+
+Detailed V1.3 audit: `docs/V1_3_CSP_404_AUDIT.md`
 
 ## Monitoring
 Search Console tracking is maintained in Issue #4.
