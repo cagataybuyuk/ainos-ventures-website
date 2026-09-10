@@ -1,0 +1,169 @@
+/* V2 Phase A prototype — isolated visual direction layer. */
+:root{
+  --v2-rule:rgba(28,28,28,.18);
+  --v2-rule-dark:rgba(255,255,255,.16);
+  --v2-quiet:#77766f;
+}
+
+/* Navigation: quieter, more editorial. */
+.nav{background:rgba(242,239,232,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--v2-rule)}
+.nav-inner{min-height:70px}
+.brand-name{font-size:13px;letter-spacing:.08em}
+.nav-links{gap:30px;font-size:12px;letter-spacing:.03em}
+.lang-link{border:0;border-left:1px solid var(--line-strong);border-radius:0;background:transparent;padding:8px 0 8px 16px}
+.lang-link:hover{background:transparent;opacity:.65}
+
+/* Hero: remove product-card chrome and let type / contrast carry the composition. */
+.hero{padding:34px 0 72px}
+.hero-shell{position:relative;border:0;border-top:1px solid var(--v2-rule);border-bottom:1px solid var(--v2-rule);border-radius:0;overflow:hidden;background:transparent;box-shadow:none}
+.hero-topline{padding:17px 0;border-bottom:1px solid var(--v2-rule);font-size:10px;letter-spacing:.17em}
+.hero-grid{grid-template-columns:minmax(0,1.48fr) minmax(340px,.52fr);min-height:700px}
+.hero-main{position:relative;padding:96px 72px 82px 0;background:none;justify-content:flex-end}
+.hero-main:before,.hero-main:after{content:"";position:absolute;border:1px solid rgba(28,28,28,.10);border-radius:50%;pointer-events:none}
+.hero-main:before{width:420px;height:420px;right:-88px;top:28px}
+.hero-main:after{width:260px;height:260px;right:62px;top:108px}
+.eyebrow{margin-bottom:36px;color:#77766f}
+h1{position:relative;z-index:1;font-size:clamp(70px,8vw,112px);line-height:.86;max-width:920px}
+.hero-copy{position:relative;z-index:1;max-width:720px;margin-top:42px;font-size:clamp(18px,1.65vw,22px);line-height:1.56}
+.actions{position:relative;z-index:1;margin-top:42px}
+.hero-side{padding:54px 38px 38px;background:#1c1c1c;justify-content:flex-end}
+.hero-side:before,.hero-side:after{width:360px;height:360px;top:-78px;border-color:rgba(255,255,255,.10)}
+.hero-side:before{right:-155px}.hero-side:after{right:-8px}
+.side-label{margin-bottom:24px}
+.side-title{font-size:clamp(31px,2.5vw,42px);max-width:360px;margin-bottom:24px}
+.side-copy{font-size:14px;line-height:1.72}
+.side-facts{margin-top:42px}
+.side-fact{grid-template-columns:86px 1fr;padding:17px 0}
+.side-foot{margin-top:36px}
+
+/* Capability system: fewer cards, more editorial rules. */
+section{padding:126px 0}
+.model{margin-top:62px;grid-template-columns:repeat(4,1fr);gap:0;padding:0;border:0;border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+.model-step{min-height:160px;padding:26px 24px 30px 0;border:0;border-right:1px solid var(--line);border-radius:0;background:transparent}
+.model-step+.model-step{padding-left:24px}
+.model-step:last-child{border-right:0}
+.model-step .no{margin-bottom:28px}
+.cap-grid{gap:0;margin-top:72px;border-top:1px solid var(--line-strong)}
+.cap,.cap.full{grid-column:1/-1;min-height:auto;padding:30px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;box-shadow:none;display:grid;grid-template-columns:180px minmax(0,1fr) minmax(260px,.55fr);gap:30px;align-items:start}
+.cap>div:first-child{display:grid;grid-template-columns:180px minmax(0,1fr);grid-column:1/3;gap:30px}
+.cap .section-kicker{grid-column:1;margin:6px 0 0}
+.cap h3{grid-column:2;font-family:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;font-size:clamp(29px,3vw,44px);font-weight:500;line-height:1.02;margin:0 0 14px;letter-spacing:-.038em}
+.cap p{grid-column:2;font-size:15px;max-width:690px}
+.cap .tags{grid-column:3;margin:3px 0 0;justify-content:flex-end}
+.tag{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:7px 0;margin-left:14px}
+
+/* Audience: preserve clarity, reduce tile feel. */
+.audience-grid{gap:0;border-top:1px solid var(--line-strong)}
+.audience{padding:22px 18px 22px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;font-size:15px}
+.audience:nth-child(even){padding-left:24px;border-left:1px solid var(--line)}
+.audience-index{margin-bottom:22px}
+
+/* Current Focus: one institutional dark field with four editorial rows. */
+#focus{background:#1c1c1c;color:#f4f1ea;border-top:0}
+#focus .section-kicker,#focus .section-note{color:#9fa39e}
+#focus .section-note{font-size:14px}
+.current-focus-grid{display:grid;grid-template-columns:1fr;margin-top:68px;border-top:1px solid var(--v2-rule-dark)}
+.focus-card{min-height:190px;padding:30px 0;border:0;border-bottom:1px solid var(--v2-rule-dark);border-radius:0;background:transparent;box-shadow:none;display:grid;grid-template-columns:140px minmax(0,1fr) minmax(260px,.42fr);gap:36px;align-items:end}
+.focus-card .work-topline{align-self:start}
+.focus-card .focus-title{font-size:clamp(38px,4.5vw,66px);line-height:.93;max-width:720px}
+.focus-card .work-role{padding:0 0 3px;border:0;text-align:right;color:#bfc2bd;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.focus-card:hover .focus-title{transform:translateX(8px)}
+.focus-card .focus-title{transition:transform .28s ease}
+
+/* Markets & Reach: typographic institutional treatment rather than filter pills. */
+.focus-grid{gap:0;margin-top:68px;border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line)}
+.panel{padding:34px 0 38px;border:0;border-radius:0;background:transparent}
+.panel+ .panel{padding-left:42px;border-left:1px solid var(--line)}
+.panel-title{margin-bottom:32px}
+.pills{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+.pill{padding:15px 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;font-size:15px}
+.focus-list{gap:0 28px}
+.focus-list div{padding:16px 0;font-size:15px}
+
+/* Team: portrait-led editorial profiles instead of repeated cards. */
+#team{background:#ebe7de}
+.team-grid-two{grid-template-columns:1fr;max-width:none;gap:0;margin-top:72px;border-top:1px solid var(--line-strong)}
+.person{min-height:0;padding:38px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;box-shadow:none;display:grid;grid-template-columns:minmax(300px,.42fr) 90px minmax(0,.58fr);grid-template-rows:auto auto auto auto auto 1fr;column-gap:38px;overflow:visible}
+.person-photo-wrap{grid-column:1;grid-row:1/7;margin:0;aspect-ratio:4/3;border:0;background:#d9d4ca}
+.person-photo{filter:saturate(.82) contrast(.98)}
+.person-no{grid-column:2;grid-row:1;margin:6px 0 0}
+.person h3{grid-column:3;grid-row:1;font-size:clamp(38px,4vw,58px);margin:0 0 8px}
+.person-role{grid-column:3;grid-row:2;margin:0 0 30px}
+.person p{grid-column:3;grid-row:3;max-width:640px;font-size:15px;line-height:1.72}
+.person-tags{grid-column:3;grid-row:4;margin-top:0;padding-top:28px}
+.person-link{grid-column:3;grid-row:5;margin-top:26px}
+.person:hover .person-photo{transform:scale(1.006)}
+
+/* Contact: keep dark close, make typography more architectural. */
+.contact{padding:138px 0}
+.contact h2{font-size:clamp(54px,6vw,82px);max-width:960px}
+.contact:before,.contact:after{width:520px;height:520px;top:-170px}
+
+@media(max-width:1040px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-main{padding:82px 0 70px}
+  .hero-side{min-height:430px}
+  .cap,.cap.full{grid-template-columns:130px minmax(0,1fr)}
+  .cap>div:first-child{grid-template-columns:130px minmax(0,1fr);grid-column:1/3}
+  .cap .tags{grid-column:2;justify-content:flex-start}
+  .focus-card{grid-template-columns:110px minmax(0,1fr)}
+  .focus-card .work-role{grid-column:2;text-align:left;margin-top:18px}
+  .person{grid-template-columns:minmax(260px,.45fr) 64px minmax(0,.55fr);column-gap:26px}
+}
+
+@media(max-width:760px){
+  section{padding:92px 0}
+  .hero{padding-bottom:44px}
+  .hero-topline{padding-left:0;padding-right:0}
+  .hero-main{padding:60px 0 54px}
+  .hero-main:before{width:280px;height:280px;right:-130px;top:36px}
+  .hero-main:after{width:170px;height:170px;right:-12px;top:92px}
+  h1{font-size:clamp(54px,16vw,72px)}
+  .model{grid-template-columns:1fr 1fr}
+  .model-step,.model-step+.model-step{padding:24px 18px 26px 0}
+  .model-step:nth-child(2n){padding-left:18px;border-right:0}
+  .model-step:nth-child(n+3){border-top:1px solid var(--line)}
+  .cap,.cap.full{display:block;padding:28px 0}
+  .cap>div:first-child{display:block}
+  .cap .section-kicker{margin-bottom:18px}
+  .cap h3{font-size:34px}
+  .cap .tags{margin-top:24px}
+  .tag{margin:0 14px 0 0}
+  .focus-card{min-height:0;padding:28px 0;display:block}
+  .focus-card .work-topline{margin-bottom:48px}
+  .focus-card .focus-title{font-size:44px}
+  .focus-card .work-role{margin-top:40px;text-align:left}
+  .focus-grid{grid-template-columns:1fr}
+  .panel+.panel{padding-left:0;border-left:0;border-top:1px solid var(--line)}
+  .pills{grid-template-columns:1fr}
+  .person{display:grid;grid-template-columns:54px minmax(0,1fr);grid-template-rows:auto;column-gap:18px;padding:30px 0}
+  .person-photo-wrap{grid-column:1/3;grid-row:auto;margin:0 0 30px;aspect-ratio:5/4}
+  .person-no{grid-column:1;grid-row:auto}
+  .person h3,.person-role,.person p,.person-tags,.person-link{grid-column:2;grid-row:auto}
+  .person h3{font-size:39px}
+}
+
+@media(max-width:430px){
+  .nav-inner{min-height:64px}
+  .hero-shell{border-top:0}
+  .hero-topline{display:grid;gap:8px}
+  .hero-main{padding:48px 0 46px}
+  h1{font-size:clamp(50px,15vw,62px)}
+  .hero-copy{font-size:17px;margin-top:32px}
+  .hero-side{padding:34px 22px;min-height:410px}
+  .model{grid-template-columns:1fr}
+  .model-step,.model-step+.model-step,.model-step:nth-child(2n){padding:22px 0;border-right:0;border-top:1px solid var(--line)}
+  .model-step:first-child{border-top:0}
+  .audience-grid{grid-template-columns:1fr}
+  .audience,.audience:nth-child(even){padding:20px 0;border-left:0}
+  .focus-card .focus-title{font-size:39px}
+  .person{grid-template-columns:42px minmax(0,1fr);column-gap:14px}
+  .person h3{font-size:36px}
+  .contact{padding:104px 0}
+  .contact h2{font-size:48px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .focus-card .focus-title{transition:none!important}
+  .focus-card:hover .focus-title{transform:none}
+}
