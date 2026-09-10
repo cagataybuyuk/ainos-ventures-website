@@ -39,13 +39,13 @@ jobs:
           set -euo pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/ainos-v2-http.log 2>&1 &
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:4173/prototype/v2/ >/dev/null; then exit 0; fi
+            if curl -fsS http://127.0.0.1:4173/prototype/v2/ >/dev/null && curl -fsS http://127.0.0.1:4173/prototype/v2/tr/ >/dev/null; then exit 0; fi
             sleep 1
           done
           cat /tmp/ainos-v2-http.log >&2 || true
           exit 1
 
-      - name: Capture prototype references
+      - name: Capture bilingual prototype references
         shell: bash
         env:
           CHROME: ${{ steps.browser.outputs.chrome }}
@@ -57,6 +57,10 @@ jobs:
           const path = require('path');
           const widths = [1440, 1024, 768, 390, 360];
           const sections = ['top', 'focus', 'markets', 'team'];
+          const prototypes = [
+            { language: 'en', url: 'http://127.0.0.1:4173/prototype/v2/' },
+            { language: 'tr', url: 'http://127.0.0.1:4173/prototype/v2/tr/' }
+          ];
           const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
           (async () => {
@@ -66,25 +70,39 @@ jobs:
               args: ['--no-sandbox', '--disable-dev-shm-usage', '--hide-scrollbars']
             });
             try {
-              for (const width of widths) {
-                const page = await browser.newPage();
-                await page.setViewport({ width, height: 1100, deviceScaleFactor: 1 });
-                await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-                await page.goto('http://127.0.0.1:4173/prototype/v2/', { waitUntil: 'networkidle0' });
-                await wait(150);
-
-                const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-                if (overflow > 1) throw new Error(`Horizontal overflow at ${width}px: ${overflow}px`);
-
-                for (const section of sections) {
-                  await page.evaluate((id) => {
-                    const el = document.getElementById(id);
-                    if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
-                  }, section);
+              for (const prototype of prototypes) {
+                for (const width of widths) {
+                  const page = await browser.newPage();
+                  await page.setViewport({ width, height: 1100, deviceScaleFactor: 1 });
+                  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+                  await page.goto(prototype.url, { waitUntil: 'networkidle0' });
                   await wait(150);
-                  await page.screenshot({ path: path.join('qa-v2-phase-a', `${width}-${section}.png`), fullPage: false });
+
+                  const state = await page.evaluate(() => ({
+                    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+                    robots: document.querySelector('meta[name="robots"]')?.content || '',
+                    title: document.title,
+                    hero: document.querySelector('.hero h1')?.textContent?.trim() || '',
+                    focusCount: document.querySelectorAll('#focus .focus-card').length,
+                    teamCount: document.querySelectorAll('#team .person').length
+                  }));
+
+                  if (state.overflow > 1) throw new Error(`${prototype.language}: horizontal overflow at ${width}px: ${state.overflow}px`);
+                  if (!state.robots.includes('noindex')) throw new Error(`${prototype.language}: prototype must remain noindex`);
+                  if (!state.hero.includes('Strategy.')) throw new Error(`${prototype.language}: hero positioning missing`);
+                  if (state.focusCount !== 4) throw new Error(`${prototype.language}: expected four Current Focus rows`);
+                  if (state.teamCount !== 2) throw new Error(`${prototype.language}: expected two founder profiles`);
+
+                  for (const section of sections) {
+                    await page.evaluate((id) => {
+                      const el = document.getElementById(id);
+                      if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+                    }, section);
+                    await wait(150);
+                    await page.screenshot({ path: path.join('qa-v2-phase-a', `${prototype.language}-${width}-${section}.png`), fullPage: false });
+                  }
+                  await page.close();
                 }
-                await page.close();
               }
             } finally {
               await browser.close();
