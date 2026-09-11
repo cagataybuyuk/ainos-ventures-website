@@ -1,6 +1,6 @@
 # V2 — Status
 
-Status: **Phase A released to production / Phase B interaction polish in progress**
+Status: **Phase A released / Phase B production candidate ready for release approval**
 
 ## Phase A — released
 - Current-site visual audit and external benchmark pass completed
@@ -19,18 +19,28 @@ Release gate on `main`:
 - Vercel production deployment: PASS
 - Post-merge screenshot artifact reviewed for desktop and mobile composition
 
-The release preserves approved copy, public facts, metadata, contact wiring, strict CSP and the lightweight static architecture.
-
-## Phase B — in progress
+## Phase B — production candidate
 Branch: `v2-phase-b-interactions`
+PR: #13 `V2 Phase B — interaction polish`
 
-Planned scope:
-- compact sticky-navigation state on scroll
-- active-section indication for desktop navigation
-- restrained navigation / CTA / content interaction polish
-- subtle stagger / line / geometry motion where it improves hierarchy
-- preserve no-JavaScript usability and `prefers-reduced-motion`
-- add regression checks for interaction/accessibility behavior before production rollout
+Implemented:
+- compact sticky-navigation state after scroll
+- active-section indication with semantic `aria-current="location"`
+- synchronized desktop/mobile section tracking
+- refined CTA, profile-link and editorial-row interaction feedback
+- restrained hero geometry entrance and stagger timing
+- no-JavaScript behavior preserved
+- explicit reduced-motion fallbacks
+- persistent interaction/accessibility regression checks
+
+Candidate QA:
+- Site Quality: PASS
+- Responsive Visual QA: PASS
+- V2 interaction contracts: PASS
+- Vercel preview deployment: PASS
+- EN/TR responsive artifact reviewed at desktop and mobile widths
+
+Phase B has not been merged to `main` yet. The next step is explicit production release approval, then post-merge Site Quality, Responsive Visual QA, Production Smoke and Vercel verification.
 
 ## Phase C — queued
 Prepare reusable Ainos Intelligence article and index/archive patterns, but keep them unpublished until real approved content exists.
