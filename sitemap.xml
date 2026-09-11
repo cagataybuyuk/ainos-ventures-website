@@ -4,10 +4,12 @@
     <loc>https://ainosventures.com/en/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://ainosventures.com/en/" />
     <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ainosventures.com/en/" />
   </url>
   <url>
     <loc>https://ainosventures.com/tr/</loc>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://ainosventures.com/en/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ainosventures.com/en/" />
   </url>
 </urlset>
