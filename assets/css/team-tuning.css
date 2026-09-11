@@ -180,3 +180,52 @@ section{padding:126px 0}
   .focus-card:hover .focus-title{transform:none}
   .person:hover .person-photo[data-person='Nidan Akmanoğlu']{transform:scale(1.28) !important}
 }
+
+/* V2 Phase B — restrained interaction polish. */
+.nav,.nav-inner,.brand-mark-img,.brand-name,.lang-link,.mobile-menu-toggle{
+  transition:background-color .24s ease,border-color .24s ease,box-shadow .24s ease,min-height .24s ease,transform .24s ease,opacity .24s ease,letter-spacing .24s ease;
+}
+.nav.is-compact{background:rgba(242,239,232,.985);border-bottom-color:rgba(28,28,28,.24);box-shadow:0 10px 28px rgba(28,28,28,.055)}
+.nav.is-compact .nav-inner{min-height:58px}
+.nav.is-compact .brand-mark-img{transform:scale(.9)}
+.nav.is-compact .brand-name{letter-spacing:.1em}
+.nav-links a{transition:color .2s ease,opacity .2s ease}
+.nav-links a.is-active,.nav-links a[aria-current='location']{color:var(--ink)}
+.nav-links a.is-active:after,.nav-links a[aria-current='location']:after{transform:scaleX(1)}
+.mobile-menu a{transition:padding-left .2s ease,color .2s ease,opacity .2s ease}
+.mobile-menu a.is-active,.mobile-menu a[aria-current='location']{color:var(--ink);padding-left:12px}
+
+.btn{box-shadow:0 0 0 rgba(28,28,28,0);transition:transform .2s ease,background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(28,28,28,.08)}
+.btn:active{transform:translateY(0);box-shadow:0 3px 10px rgba(28,28,28,.05)}
+.person-link{transition:transform .2s ease,color .2s ease,border-color .2s ease}
+.person-link:hover{transform:translateX(3px)}
+
+.cap,.panel,.person{position:relative}
+.cap:after,.panel:after,.person:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .36s cubic-bezier(.22,.61,.36,1);pointer-events:none}
+.cap:hover:after,.panel:hover:after,.person:hover:after{transform:scaleX(1)}
+
+html.js .hero-main:before,html.js .hero-side:before{animation:v2-geometry-in .72s cubic-bezier(.22,.61,.36,1) both}
+html.js .hero-main:after,html.js .hero-side:after{animation:v2-geometry-in .86s .08s cubic-bezier(.22,.61,.36,1) both}
+@keyframes v2-geometry-in{from{opacity:0;transform:scale(.965)}to{opacity:1;transform:scale(1)}}
+
+html.js .cap-grid .reveal:nth-child(2),html.js .audience-grid .reveal:nth-child(2),html.js .current-focus-grid .reveal:nth-child(2),html.js .team-grid .reveal:nth-child(2){transition-delay:.055s}
+html.js .cap-grid .reveal:nth-child(3),html.js .audience-grid .reveal:nth-child(3),html.js .current-focus-grid .reveal:nth-child(3){transition-delay:.1s}
+html.js .cap-grid .reveal:nth-child(4),html.js .audience-grid .reveal:nth-child(4),html.js .current-focus-grid .reveal:nth-child(4){transition-delay:.145s}
+html.js .audience-grid .reveal:nth-child(5){transition-delay:.19s}
+html.js .audience-grid .reveal:nth-child(6){transition-delay:.235s}
+html.js .audience-grid .reveal:nth-child(7){transition-delay:.28s}
+html.js .audience-grid .reveal:nth-child(8){transition-delay:.325s}
+html.js .focus-grid .reveal:nth-child(2){transition-delay:.07s}
+
+@media(max-width:900px){
+  .nav.is-compact .nav-inner{min-height:58px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nav,.nav-inner,.brand-mark-img,.brand-name,.lang-link,.mobile-menu-toggle,.nav-links a,.mobile-menu a,.btn,.person-link,.cap:after,.panel:after,.person:after{transition:none!important}
+  html.js .hero-main:before,html.js .hero-main:after,html.js .hero-side:before,html.js .hero-side:after{animation:none!important}
+  .btn:hover,.btn:active,.person-link:hover{transform:none!important}
+  .cap:after,.panel:after,.person:after{transform:none!important;opacity:0}
+  html.js .cap-grid .reveal,html.js .audience-grid .reveal,html.js .current-focus-grid .reveal,html.js .team-grid .reveal,html.js .focus-grid .reveal{transition-delay:0s!important}
+}
