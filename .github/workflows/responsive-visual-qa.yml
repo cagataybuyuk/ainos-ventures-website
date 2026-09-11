@@ -201,8 +201,12 @@ jobs:
                 if (topState.compact) throw new Error(`${language}: nav must not be compact at page top`);
                 if (topState.currentCount !== 0) throw new Error(`${language}: no desktop section should be current at page top`);
 
-                await page.evaluate(() => document.querySelector('#focus')?.scrollIntoView({ behavior: 'auto', block: 'start' }));
-                await wait(260);
+                await page.evaluate(() => document.querySelector('#focus')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+                await page.waitForFunction(
+                  () => document.querySelector('.nav-links a[href="#focus"]')?.getAttribute('aria-current') === 'location',
+                  { timeout: 2500 }
+                );
+                await wait(80);
 
                 const focusState = await page.evaluate(() => {
                   const nav = document.querySelector('.nav');
@@ -241,7 +245,11 @@ jobs:
                 }
 
                 await mobile.click('#mobile-navigation a[href="#team"]');
-                await wait(300);
+                await mobile.waitForFunction(
+                  () => document.querySelector('.nav-links a[href="#team"]')?.getAttribute('aria-current') === 'location',
+                  { timeout: 2500 }
+                );
+                await wait(80);
                 const mobileTeamState = await mobile.evaluate(() => {
                   const toggle = document.querySelector('.mobile-menu-toggle');
                   const menu = document.querySelector('#mobile-navigation');
