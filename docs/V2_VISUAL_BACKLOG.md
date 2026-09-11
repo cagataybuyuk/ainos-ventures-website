@@ -23,13 +23,15 @@ Source audit: `docs/V2_VISUAL_EXPERIENCE_AUDIT.md`
 - [x] Preserve `prefers-reduced-motion`
 - [x] Add interaction/accessibility regression checks
 - [x] Validate EN/TR desktop, tablet and mobile behavior before production merge
-- [ ] Release and validate Phase B on production
+- [x] Release and validate Phase B on production
 
 ## Phase C — Editorial extensibility
 - [ ] Define a reusable Ainos Intelligence article template
 - [ ] Define an Intelligence index/archive pattern for future content
 - [ ] Keep Intelligence unpublished until the first real piece is approved
 - [ ] Define optional credibility modules for future verified material only
+
+Phase C is intentionally queued rather than active. It should start only when there is real approved editorial material or another concrete credibility-content need.
 
 ## Guardrails
 - [x] No unsupported metrics, offices, clients, logos or deal claims
@@ -48,13 +50,12 @@ Source audit: `docs/V2_VISUAL_EXPERIENCE_AUDIT.md`
 - Production Smoke: PASS
 - Vercel production deployment: PASS
 
-## Phase B candidate evidence
-- Branch: `v2-phase-b-interactions`
-- PR #13: `V2 Phase B — interaction polish`
-- Site Quality: PASS
-- Responsive Visual QA: PASS
+## Phase B release evidence
+- PR #13 merged to `main`
+- Production merge commit: `8a2e4491fc92e0233836c2024c3a7a30b1c08364`
+- Site Quality run 139: PASS
+- Responsive Visual QA run 25: PASS
 - Interaction/accessibility contracts: PASS
-- Vercel preview deployment: PASS
-- EN/TR responsive artifact reviewed
-
-Phase B is ready for the production release gate; it is not yet released.
+- Production Smoke run 62: PASS
+- Vercel production deployment: PASS
+- EN/TR post-merge responsive artifact generated and visually reviewed
