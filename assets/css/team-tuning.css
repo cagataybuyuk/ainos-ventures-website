@@ -12,7 +12,8 @@
 :root{
   --v2-rule:rgba(28,28,28,.18);
   --v2-rule-dark:rgba(255,255,255,.16);
-  --v2-quiet:#77766f;
+  --v2-quiet:#676760;
+  --muted:#626762;
 }
 
 /* Navigation: quieter, more editorial. */
@@ -32,7 +33,7 @@
 .hero-main:before,.hero-main:after{content:"";position:absolute;border:1px solid rgba(28,28,28,.10);border-radius:50%;pointer-events:none}
 .hero-main:before{width:420px;height:420px;right:-88px;top:28px}
 .hero-main:after{width:260px;height:260px;right:62px;top:108px}
-.eyebrow{margin-bottom:36px;color:#77766f}
+.eyebrow{margin-bottom:36px;color:var(--v2-quiet)}
 h1{position:relative;z-index:1;font-size:clamp(70px,8vw,112px);line-height:.86;max-width:920px}
 .hero-copy{position:relative;z-index:1;max-width:720px;margin-top:42px;font-size:clamp(18px,1.65vw,22px);line-height:1.56}
 .actions{position:relative;z-index:1;margin-top:42px}
