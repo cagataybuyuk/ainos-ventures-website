@@ -1,28 +1,39 @@
 # V2 — Status
 
-Status: **Phase A production candidate accepted / ready to merge**
+Status: **Phase A released to production / Phase B interaction polish in progress**
 
-## Completed
-- Current-site visual audit
-- External benchmark pass
+## Phase A — released
+- Current-site visual audit and external benchmark pass completed
 - V2 principles and phased backlog defined
-- EN/TR visual direction prototypes completed
-- Desktop / tablet / mobile visual review completed at 1440 / 1024 / 768 / 390 / 360 px
-- Phase A art direction applied to the real `/en/` and `/tr/` production page structures on the review branch
-- Hero, operating model, capabilities, Current Focus, Markets & Reach and Team moved toward an editorial / boutique-advisory composition
-- Temporary prototype pages and prototype-only workflow removed before production merge
+- EN/TR visual direction reviewed at 1440 / 1024 / 768 / 390 / 360 px
+- Editorial hero, operating model, capabilities, Current Focus, Markets & Reach and portrait-led Team released to production
+- Temporary prototype-only assets removed before merge
 - Persistent responsive QA extended with V2 visual contracts
-- Site Quality PASS on the production candidate
-- Bilingual Phase A visual QA PASS on the production candidate
-- Vercel preview deployment PASS
 
-## Current production candidate
-The rollout intentionally preserves approved copy, public facts, metadata, contact wiring and the lightweight static architecture. The primary visual implementation lives in `assets/css/team-tuning.css`, which is already loaded by both production language pages but not by the branded 404 page.
+Production merge commit: `3a395a9e9a51cd43a94c5bb268839311b8df01ff`
 
-Persistent visual QA in `.github/workflows/responsive-visual-qa.yml` now checks EN/TR across the existing breakpoints and protects the V2 editorial hero, Current Focus, Markets & Reach and Team contracts in addition to the existing no-JavaScript and 404 checks.
+Release gate on `main`:
+- Site Quality: PASS
+- Responsive Visual QA: PASS
+- Production Smoke: PASS
+- Vercel production deployment: PASS
+- Post-merge screenshot artifact reviewed for desktop and mobile composition
 
-## Next
-Merge Phase A after the final PR check, verify Site Quality, Responsive Visual QA, Production Smoke and Vercel on `main`, then begin Phase B interaction polish.
+The release preserves approved copy, public facts, metadata, contact wiring, strict CSP and the lightweight static architecture.
+
+## Phase B — in progress
+Branch: `v2-phase-b-interactions`
+
+Planned scope:
+- compact sticky-navigation state on scroll
+- active-section indication for desktop navigation
+- restrained navigation / CTA / content interaction polish
+- subtle stagger / line / geometry motion where it improves hierarchy
+- preserve no-JavaScript usability and `prefers-reduced-motion`
+- add regression checks for interaction/accessibility behavior before production rollout
+
+## Phase C — queued
+Prepare reusable Ainos Intelligence article and index/archive patterns, but keep them unpublished until real approved content exists.
 
 ## Parallel monitoring
 Search Console sitemap re-fetch remains separate in Issue #4 and does not block V2.
