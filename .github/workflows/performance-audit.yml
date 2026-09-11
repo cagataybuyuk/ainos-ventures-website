@@ -63,33 +63,36 @@ jobs:
           cat /tmp/ainos-perf-http.log >&2 || true
           exit 1
 
-      - name: Run Lighthouse mobile and desktop
+      - name: Run repeated Lighthouse mobile and desktop samples
         shell: bash
         env:
           CHROME: ${{ steps.browser.outputs.chrome }}
         run: |
           set -euo pipefail
           mkdir -p lighthouse-results
-          for lang in en tr; do
-            ./node_modules/.bin/lighthouse "http://127.0.0.1:4173/${lang}/" \
-              --quiet \
-              --chrome-path="$CHROME" \
-              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
-              --only-categories=performance,accessibility,best-practices,seo \
-              --output=json \
-              --output-path="lighthouse-results/${lang}-mobile.json"
-
-            ./node_modules/.bin/lighthouse "http://127.0.0.1:4173/${lang}/" \
-              --quiet \
-              --preset=desktop \
-              --chrome-path="$CHROME" \
-              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
-              --only-categories=performance,accessibility,best-practices,seo \
-              --output=json \
-              --output-path="lighthouse-results/${lang}-desktop.json"
+          for run in 1 2 3; do
+            for lang in en tr; do
+              ./node_modules/.bin/lighthouse "http://127.0.0.1:4173/${lang}/" \
+                --quiet \
+                --chrome-path="$CHROME" \
+                --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+                --only-categories=performance,accessibility,best-practices,seo \
+                --output=json \
+                --output-path="lighthouse-results/${lang}-mobile-r${run}.json"
+            done
+            for lang in en tr; do
+              ./node_modules/.bin/lighthouse "http://127.0.0.1:4173/${lang}/" \
+                --quiet \
+                --preset=desktop \
+                --chrome-path="$CHROME" \
+                --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+                --only-categories=performance,accessibility,best-practices,seo \
+                --output=json \
+                --output-path="lighthouse-results/${lang}-desktop-r${run}.json"
+            done
           done
 
-      - name: Summarize baseline
+      - name: Summarize median baseline
         shell: bash
         run: |
           set -euo pipefail
@@ -97,43 +100,78 @@ jobs:
           const fs = require('fs');
           const path = require('path');
 
-          const reports = fs.readdirSync('lighthouse-results')
-            .filter(name => name.endsWith('.json'))
-            .sort();
+          const median = values => {
+            const sorted = [...values].sort((a, b) => a - b);
+            return sorted[Math.floor(sorted.length / 2)];
+          };
+          const sec = value => `${(value / 1000).toFixed(2)} s`;
+          const ms = value => `${Math.round(value)} ms`;
+          const dec = value => Number(value).toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0';
 
-          const rows = [];
-          for (const name of reports) {
+          const groups = new Map();
+          for (const name of fs.readdirSync('lighthouse-results').filter(name => name.endsWith('.json'))) {
+            const match = name.match(/^(en|tr)-(mobile|desktop)-r\d+\.json$/);
+            if (!match) continue;
+            const key = `${match[1]}-${match[2]}`;
             const report = JSON.parse(fs.readFileSync(path.join('lighthouse-results', name), 'utf8'));
             const categories = report.categories;
             const audits = report.audits;
-            const score = key => Math.round((categories[key]?.score || 0) * 100);
-            const metric = key => audits[key]?.displayValue || 'n/a';
-            const bytes = audits['total-byte-weight']?.numericValue || 0;
-            rows.push({
-              profile: name.replace('.json', ''),
-              performance: score('performance'),
-              accessibility: score('accessibility'),
-              bestPractices: score('best-practices'),
-              seo: score('seo'),
-              fcp: metric('first-contentful-paint'),
-              lcp: metric('largest-contentful-paint'),
-              tbt: metric('total-blocking-time'),
-              cls: metric('cumulative-layout-shift'),
-              speedIndex: metric('speed-index'),
-              bytes
-            });
+            const sample = {
+              performance: (categories.performance?.score || 0) * 100,
+              accessibility: (categories.accessibility?.score || 0) * 100,
+              bestPractices: (categories['best-practices']?.score || 0) * 100,
+              seo: (categories.seo?.score || 0) * 100,
+              fcp: audits['first-contentful-paint']?.numericValue || 0,
+              lcp: audits['largest-contentful-paint']?.numericValue || 0,
+              tbt: audits['total-blocking-time']?.numericValue || 0,
+              cls: audits['cumulative-layout-shift']?.numericValue || 0,
+              speedIndex: audits['speed-index']?.numericValue || 0,
+              bytes: audits['total-byte-weight']?.numericValue || 0,
+            };
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(sample);
+          }
+
+          const rows = [];
+          let failed = false;
+          for (const key of ['en-desktop', 'en-mobile', 'tr-desktop', 'tr-mobile']) {
+            const samples = groups.get(key) || [];
+            if (samples.length !== 3) throw new Error(`${key}: expected 3 Lighthouse samples, found ${samples.length}`);
+            const pick = field => median(samples.map(sample => sample[field]));
+            const row = {
+              profile: key,
+              performance: Math.round(pick('performance')),
+              accessibility: Math.round(pick('accessibility')),
+              bestPractices: Math.round(pick('bestPractices')),
+              seo: Math.round(pick('seo')),
+              fcp: pick('fcp'),
+              lcp: pick('lcp'),
+              tbt: pick('tbt'),
+              cls: pick('cls'),
+              speedIndex: pick('speedIndex'),
+              bytes: pick('bytes'),
+            };
+            rows.push(row);
+            if (row.accessibility < 100 || row.bestPractices < 100 || row.seo < 100 || row.cls > 0.01) failed = true;
           }
 
           const header = '| Profile | Perf | A11y | Best | SEO | FCP | LCP | TBT | CLS | Speed Index | Transfer |';
           const divider = '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |';
-          const lines = rows.map(r => `| ${r.profile} | ${r.performance} | ${r.accessibility} | ${r.bestPractices} | ${r.seo} | ${r.fcp} | ${r.lcp} | ${r.tbt} | ${r.cls} | ${r.speedIndex} | ${(r.bytes / 1024).toFixed(1)} KiB |`);
-          const markdown = ['# Lighthouse baseline', '', header, divider, ...lines, ''].join('\n');
+          const lines = rows.map(r => `| ${r.profile} | ${r.performance} | ${r.accessibility} | ${r.bestPractices} | ${r.seo} | ${sec(r.fcp)} | ${sec(r.lcp)} | ${ms(r.tbt)} | ${dec(r.cls)} | ${sec(r.speedIndex)} | ${(r.bytes / 1024).toFixed(1)} KiB |`);
+          const note = '> Median of three lab samples per profile. Local Python HTTP-server cache/document-latency diagnostics are not production-authoritative.';
+          const markdown = ['# Lighthouse median baseline', '', header, divider, ...lines, '', note, ''].join('\n');
           fs.writeFileSync('lighthouse-results/summary.md', markdown);
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
           console.log(markdown);
+
+          if (failed) {
+            console.error('Stable quality floor failed: expected A11y/Best/SEO 100 and CLS <= 0.01 in all median profiles.');
+            process.exit(1);
+          }
           JS
 
       - name: Upload Lighthouse artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-performance-baseline
