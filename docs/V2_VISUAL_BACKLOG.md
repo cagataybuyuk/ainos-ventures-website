@@ -12,14 +12,18 @@ Source audit: `docs/V2_VISUAL_EXPERIENCE_AUDIT.md`
 - [x] Redesign Team as a more senior, portrait-led section
 - [x] Redesign Markets & Reach as an institutional geography treatment
 - [x] Produce EN/TR desktop and mobile visual references for review
+- [x] Release and validate Phase A on production
 
 ## Phase B — Interaction polish
-- [ ] Add compact navigation state on scroll
-- [ ] Add active-section indication
-- [ ] Refine navigation / CTA / card hover and focus transitions
-- [ ] Introduce restrained stagger / line / geometry motion
-- [ ] Preserve no-JS usability
-- [ ] Preserve `prefers-reduced-motion`
+- [x] Add compact navigation state on scroll
+- [x] Add active-section indication
+- [x] Refine navigation / CTA / content hover and focus transitions
+- [x] Introduce restrained stagger / line / geometry motion
+- [x] Preserve no-JS usability
+- [x] Preserve `prefers-reduced-motion`
+- [x] Add interaction/accessibility regression checks
+- [x] Validate EN/TR desktop, tablet and mobile behavior before production merge
+- [ ] Release and validate Phase B on production
 
 ## Phase C — Editorial extensibility
 - [ ] Define a reusable Ainos Intelligence article template
@@ -33,15 +37,24 @@ Source audit: `docs/V2_VISUAL_EXPERIENCE_AUDIT.md`
 - [x] No SaaS / generic AI visual language
 - [x] No unnecessary framework/runtime dependency
 - [x] Maintain EN/TR parity
-- [x] Maintain accessibility / CSP / SEO / production smoke checks in the Phase A candidate
+- [x] Maintain accessibility / CSP / SEO / production smoke checks
 - [x] Responsive visual QA at desktop, tablet and mobile breakpoints
 
-## Phase A evidence
-- Review branch: `v2-phase-a-prototype`
-- Draft review PR: #12
-- Production-candidate visual QA covers EN/TR at 1440 / 1024 / 768 / 390 / 360 px
+## Phase A release evidence
+- PR #12 merged to `main`
+- Production merge commit: `3a395a9e9a51cd43a94c5bb268839311b8df01ff`
 - Site Quality: PASS
-- V2 bilingual visual contracts: PASS
-- Vercel preview deployment: PASS
+- Responsive Visual QA: PASS
+- Production Smoke: PASS
+- Vercel production deployment: PASS
 
-Phase A should be considered complete only after the merged `main` commit passes the persistent Site Quality, Responsive Visual QA, Production Smoke and Vercel checks.
+## Phase B candidate evidence
+- Branch: `v2-phase-b-interactions`
+- PR #13: `V2 Phase B — interaction polish`
+- Site Quality: PASS
+- Responsive Visual QA: PASS
+- Interaction/accessibility contracts: PASS
+- Vercel preview deployment: PASS
+- EN/TR responsive artifact reviewed
+
+Phase B is ready for the production release gate; it is not yet released.
