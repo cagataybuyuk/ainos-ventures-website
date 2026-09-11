@@ -2,15 +2,15 @@
 
 Date: 2026-09-11
 Workstream: Issue #14 / PR #15
-Baseline source: released V2 Phase B code on `main`, measured from the `performance-cwv-baseline` branch before optimization changes.
+Baseline source: released V2 Phase B code on `main`, measured and hardened on `performance-cwv-baseline`.
 
-## Method
+## Scope and method
 
-The first pass uses Lighthouse 13.4.1 in GitHub Actions with Chrome 152 against a local static HTTP server. EN and TR are audited in mobile and desktop profiles. Raw Lighthouse JSON and a generated summary are stored as a workflow artifact.
+The audit uses Lighthouse 13.4.1 in GitHub Actions with Chrome 152 against a local static HTTP server. EN and TR are tested in mobile and desktop profiles. The stabilized workflow runs three samples per profile and reports the median, with raw Lighthouse JSON and a generated summary retained as an artifact.
 
-This local-server pass is appropriate for frontend execution, layout stability, accessibility and relative regression testing. Cache-lifetime and document-latency opportunities from this run are **not production-authoritative**, because Python's development HTTP server does not reproduce Vercel CDN caching/compression behavior.
+This is a **lab performance baseline**, not field Core Web Vitals data. It is suitable for frontend execution, layout stability, accessibility and regression detection. Cache-lifetime and document-latency opportunities reported against Python's development HTTP server are not treated as production-authoritative because that server does not reproduce Vercel CDN caching/compression behavior.
 
-## Initial scores
+## Initial single-sample signal
 
 | Profile | Performance | Accessibility | Best Practices | SEO | FCP | LCP | TBT | CLS | Speed Index | Transfer |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -19,35 +19,65 @@ This local-server pass is appropriate for frontend execution, layout stability, 
 | TR desktop | 100 | 95 | 100 | 100 | 0.3 s | 0.4 s | 0 ms | 0 | 0.3 s | 56.9 KiB |
 | TR mobile | 100 | 95 | 100 | 100 | 1.4 s | 1.4 s | 0 ms | 0 | 1.4 s | 56.9 KiB |
 
-## Interpretation
+The isolated EN-mobile TBT result was correctly treated as lab noise rather than a JavaScript regression. Repeated sampling later produced 0 ms median TBT on every profile.
 
-The website is already very light: first-load transfer in the local audit is roughly 57 KiB, CLS is zero, desktop performance is 100, and Best Practices / SEO are 100 in all four profiles.
+## Confirmed findings and fixes
 
-The isolated EN-mobile TBT result is not treated as a confirmed regression. The same shared JavaScript produced 0 ms TBT in TR mobile and both desktop runs. The EN trace contains a one-off ~966 ms page task plus unusually inflated main-thread time, so the next measurement step is repeated sampling and median comparison rather than speculative JavaScript refactoring.
+### 1. Small muted-text contrast
 
-## Confirmed accessibility findings
+Lighthouse consistently scored accessibility at 95 because small hero/section labels were slightly below the required contrast ratio on the warm ivory backgrounds.
 
-The 95 accessibility score is reproducible across EN/TR and desktop/mobile. Lighthouse identified two concrete classes of issue:
+Applied fix:
+- `--muted` hardened to `#626762`
+- `--v2-quiet` hardened to `#676760`
+- the V2 eyebrow now uses the shared quiet token
 
-1. **Small muted text contrast** — hero topline, eyebrow and section-kicker text are slightly below the 4.5:1 requirement on warm ivory / soft-ivory backgrounds. Current measured ratios are approximately 3.97–4.27:1 depending on the token/background.
-2. **Visible-label / accessible-name mismatch** — the language switch and email CTA use `aria-label` values that do not include their visible label text. The email address itself is already a clear accessible name; language switches should include `TR` / `EN` in any explicit accessible label.
+The visual direction remains unchanged while the affected text moves safely above the contrast threshold.
 
-These are high-confidence, low-risk fixes and do not require a visual redesign.
+### 2. Visible label / accessible name mismatch
+
+The language switch and visible email CTA had explicit accessible labels that did not contain the visible label text.
+
+Applied fix:
+- language-switch accessible labels now include visible `TR` / `EN`
+- redundant email `aria-label` values were removed so the visible email address is the accessible name
+
+### 3. Intermittent mobile layout shift during progressive enhancement
+
+Repeated PR sampling surfaced an intermittent TR-mobile CLS of approximately `0.055`. Lighthouse attributed the shift to the full `main` region moving when the no-JavaScript fallback navigation collapsed into the JavaScript-enhanced mobile header after script boot.
+
+Applied fix:
+- modern scripting-enabled browsers now reserve the enhanced one-row mobile navigation layout at CSS evaluation time via the `scripting: enabled` media feature
+- the existing `html.js` selectors remain as a compatibility fallback
+- true no-JavaScript users continue to receive the visible fallback navigation
+
+This removes the paint-timing race without adding a render-blocking bootstrap script or changing the mobile visual design.
+
+## Stabilized median result after hardening
+
+PR-run median of three samples per profile:
+
+| Profile | Performance | Accessibility | Best Practices | SEO | FCP | LCP | TBT | CLS | Speed Index | Transfer |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| EN desktop | 100 | 100 | 100 | 100 | 0.32 s | 0.36 s | 0 ms | 0 | 0.32 s | 56.5 KiB |
+| EN mobile | 100 | 100 | 100 | 100 | 1.20 s | 1.35 s | 0 ms | 0 | 1.20 s | 56.5 KiB |
+| TR desktop | 100 | 100 | 100 | 100 | 0.32 s | 0.36 s | 0 ms | 0 | 0.32 s | 57.0 KiB |
+| TR mobile | 100 | 100 | 100 | 100 | 1.35 s | 1.35 s | 0 ms | 0 | 1.35 s | 57.0 KiB |
+
+The performance workflow enforces a stable lab quality floor of Accessibility / Best Practices / SEO = 100 and median CLS <= 0.01. Performance score itself is reported but not used as a hard pass/fail gate because synthetic timing is inherently variable.
 
 ## Delivery / asset observations
 
+- Normal first-load transfer in the local audit is approximately 57 KiB.
 - Founder JPGs are approximately 31 KiB each and already use explicit dimensions, lazy loading and async decoding.
-- Shared CSS source is approximately 33 KiB total before transfer compression.
+- Shared CSS source is approximately 33 KiB before transfer compression.
 - Main JavaScript source is approximately 5.3 KiB.
 - The social-sharing PNG is not part of normal page rendering and is approximately 7.5 KiB.
 - No framework/runtime bundle exists.
+- `vercel.json` intentionally uses revalidation for CSS/JS because asset filenames are stable rather than content-hashed; long immutable caching would risk stale releases.
 
-## Next actions
+## Conclusion
 
-1. Re-run Lighthouse with repeated mobile/desktop sampling and use median values to remove one-run noise.
-2. Apply the two confirmed accessibility fixes on the branch.
-3. Re-measure accessibility and performance.
-4. Inspect production delivery separately before acting on cache/document-latency suggestions.
-5. Merge only if the measured result improves or preserves the released V2 experience.
+No broad CSS/JS refactor, framework change, image-conversion project or speculative dead-code cleanup is justified by the measurements. The useful work was targeted: accessibility hardening plus elimination of an intermittent progressive-enhancement CLS race.
 
-No CSS/JS dead-code cleanup is justified by the current performance evidence alone.
+The permanent Lighthouse workflow provides a repeatable regression baseline for future visual/content changes. Any later performance work should be driven by measured production/field evidence rather than cleanup for its own sake.
