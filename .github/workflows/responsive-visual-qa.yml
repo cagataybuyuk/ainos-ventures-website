@@ -109,6 +109,58 @@ jobs:
           });
           JS
 
+      - name: Verify V2 visual contracts
+        shell: bash
+        env:
+          CHROME: ${{ steps.browser.outputs.chrome }}
+        run: |
+          set -euo pipefail
+          node <<'JS'
+          const puppeteer = require('puppeteer-core');
+
+          (async () => {
+            const browser = await puppeteer.launch({
+              executablePath: process.env.CHROME,
+              headless: true,
+              args: ['--no-sandbox', '--disable-dev-shm-usage']
+            });
+
+            try {
+              for (const language of ['en', 'tr']) {
+                for (const width of [1440, 390, 360]) {
+                  const page = await browser.newPage();
+                  await page.setViewport({ width, height: 1000, deviceScaleFactor: 1 });
+                  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+                  await page.goto(`http://127.0.0.1:4173/${language}/`, { waitUntil: 'networkidle0' });
+
+                  const state = await page.evaluate(() => ({
+                    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+                    heroRadius: getComputedStyle(document.querySelector('.hero-shell')).borderRadius,
+                    focusCount: document.querySelectorAll('#focus .focus-card').length,
+                    teamCount: document.querySelectorAll('#team .person').length,
+                    marketPanelCount: document.querySelectorAll('#focus + section .panel').length,
+                    focusRadius: getComputedStyle(document.querySelector('#focus .focus-card')).borderRadius,
+                    marketRadius: getComputedStyle(document.querySelector('#focus + section .pill')).borderRadius
+                  }));
+
+                  if (state.overflow > 1) throw new Error(`${language}: horizontal overflow at ${width}px: ${state.overflow}px`);
+                  if (state.heroRadius !== '0px') throw new Error(`${language}: V2 hero shell must remain square/editorial`);
+                  if (state.focusCount !== 4 || state.focusRadius !== '0px') throw new Error(`${language}: V2 Current Focus contract failed`);
+                  if (state.teamCount !== 2) throw new Error(`${language}: V2 Team contract failed`);
+                  if (state.marketPanelCount !== 2 || state.marketRadius !== '0px') throw new Error(`${language}: V2 Markets contract failed`);
+
+                  await page.close();
+                }
+              }
+            } finally {
+              await browser.close();
+            }
+          })().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          JS
+
       - name: Capture responsive screenshots
         shell: bash
         env:
@@ -122,6 +174,13 @@ jobs:
 
           const widths = [1440, 1024, 768, 390, 360];
           const languages = ['en', 'tr'];
+          const sections = [
+            { key: 'hero', selector: '.hero' },
+            { key: 'what', selector: '#what' },
+            { key: 'focus', selector: '#focus' },
+            { key: 'markets', selector: '#focus + section' },
+            { key: 'team', selector: '#team' }
+          ];
           const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
           (async () => {
@@ -140,19 +199,14 @@ jobs:
                   await page.goto(`http://127.0.0.1:4173/${language}/`, { waitUntil: 'networkidle0' });
                   await wait(150);
 
-                  await page.screenshot({
-                    path: path.join('qa-responsive', `${language}-${width}-hero.png`),
-                    fullPage: false
-                  });
-
-                  for (const section of ['focus', 'team']) {
-                    await page.evaluate((id) => {
-                      const el = document.getElementById(id);
+                  for (const section of sections) {
+                    await page.evaluate((selector) => {
+                      const el = document.querySelector(selector);
                       if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
-                    }, section);
+                    }, section.selector);
                     await wait(180);
                     await page.screenshot({
-                      path: path.join('qa-responsive', `${language}-${width}-${section}.png`),
+                      path: path.join('qa-responsive', `${language}-${width}-${section.key}.png`),
                       fullPage: false
                     });
                   }
