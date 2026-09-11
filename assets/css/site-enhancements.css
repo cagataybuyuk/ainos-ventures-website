@@ -56,6 +56,11 @@ html.js .reveal.visible{opacity:1;transform:none}
   .mobile-menu a:last-child{border-bottom:0}
 }
 
+@media(max-width:900px) and (scripting:enabled){
+  .nav-inner{flex-wrap:nowrap;padding-top:0;padding-bottom:0}
+  .nav-links{display:none}
+}
+
 @media(max-width:760px){
   .team-grid-two,.current-focus-grid{grid-template-columns:1fr}
   .focus-card{min-height:280px}
