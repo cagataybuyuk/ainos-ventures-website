@@ -3,7 +3,7 @@ name: Performance baseline
 on:
   workflow_dispatch:
   push:
-    branches: [performance-cwv-baseline]
+    branches: [main]
     paths:
       - 'en/**'
       - 'tr/**'
