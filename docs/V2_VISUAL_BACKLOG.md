@@ -15,14 +15,15 @@ Source audit: `docs/V2_VISUAL_EXPERIENCE_AUDIT.md`
 - [x] Release and validate Phase A on production
 
 ## Phase B — Interaction polish
-- [ ] Add compact navigation state on scroll
-- [ ] Add active-section indication
-- [ ] Refine navigation / CTA / content hover and focus transitions
-- [ ] Introduce restrained stagger / line / geometry motion
-- [ ] Preserve no-JS usability
-- [ ] Preserve `prefers-reduced-motion`
-- [ ] Add interaction/accessibility regression checks
-- [ ] Validate EN/TR desktop, tablet and mobile behavior before production merge
+- [x] Add compact navigation state on scroll
+- [x] Add active-section indication
+- [x] Refine navigation / CTA / content hover and focus transitions
+- [x] Introduce restrained stagger / line / geometry motion
+- [x] Preserve no-JS usability
+- [x] Preserve `prefers-reduced-motion`
+- [x] Add interaction/accessibility regression checks
+- [x] Validate EN/TR desktop, tablet and mobile behavior before production merge
+- [ ] Release and validate Phase B on production
 
 ## Phase C — Editorial extensibility
 - [ ] Define a reusable Ainos Intelligence article template
@@ -47,4 +48,13 @@ Source audit: `docs/V2_VISUAL_EXPERIENCE_AUDIT.md`
 - Production Smoke: PASS
 - Vercel production deployment: PASS
 
-Phase B proceeds on `v2-phase-b-interactions`.
+## Phase B candidate evidence
+- Branch: `v2-phase-b-interactions`
+- PR #13: `V2 Phase B — interaction polish`
+- Site Quality: PASS
+- Responsive Visual QA: PASS
+- Interaction/accessibility contracts: PASS
+- Vercel preview deployment: PASS
+- EN/TR responsive artifact reviewed
+
+Phase B is ready for the production release gate; it is not yet released.
