@@ -1,0 +1,142 @@
+name: Performance baseline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [performance-cwv-baseline]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - 'assets/**'
+      - '.github/workflows/performance-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - 'assets/**'
+      - '.github/workflows/performance-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find browser
+        id: browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then
+            echo "No Chrome/Chromium browser found on runner" >&2
+            exit 1
+          fi
+          echo "chrome=$CHROME" >> "$GITHUB_OUTPUT"
+          "$CHROME" --version
+
+      - name: Install Lighthouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock lighthouse
+          ./node_modules/.bin/lighthouse --version
+
+      - name: Start local site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/ainos-perf-http.log 2>&1 &
+          echo $! > /tmp/ainos-perf-http.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/en/ >/dev/null && curl -fsS http://127.0.0.1:4173/tr/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/ainos-perf-http.log >&2 || true
+          exit 1
+
+      - name: Run Lighthouse mobile and desktop
+        shell: bash
+        env:
+          CHROME: ${{ steps.browser.outputs.chrome }}
+        run: |
+          set -euo pipefail
+          mkdir -p lighthouse-results
+          for lang in en tr; do
+            ./node_modules/.bin/lighthouse "http://127.0.0.1:4173/${lang}/" \
+              --quiet \
+              --chrome-path="$CHROME" \
+              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --output=json \
+              --output-path="lighthouse-results/${lang}-mobile.json"
+
+            ./node_modules/.bin/lighthouse "http://127.0.0.1:4173/${lang}/" \
+              --quiet \
+              --preset=desktop \
+              --chrome-path="$CHROME" \
+              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --output=json \
+              --output-path="lighthouse-results/${lang}-desktop.json"
+          done
+
+      - name: Summarize baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'JS'
+          const fs = require('fs');
+          const path = require('path');
+
+          const reports = fs.readdirSync('lighthouse-results')
+            .filter(name => name.endsWith('.json'))
+            .sort();
+
+          const rows = [];
+          for (const name of reports) {
+            const report = JSON.parse(fs.readFileSync(path.join('lighthouse-results', name), 'utf8'));
+            const categories = report.categories;
+            const audits = report.audits;
+            const score = key => Math.round((categories[key]?.score || 0) * 100);
+            const metric = key => audits[key]?.displayValue || 'n/a';
+            const bytes = audits['total-byte-weight']?.numericValue || 0;
+            rows.push({
+              profile: name.replace('.json', ''),
+              performance: score('performance'),
+              accessibility: score('accessibility'),
+              bestPractices: score('best-practices'),
+              seo: score('seo'),
+              fcp: metric('first-contentful-paint'),
+              lcp: metric('largest-contentful-paint'),
+              tbt: metric('total-blocking-time'),
+              cls: metric('cumulative-layout-shift'),
+              speedIndex: metric('speed-index'),
+              bytes
+            });
+          }
+
+          const header = '| Profile | Perf | A11y | Best | SEO | FCP | LCP | TBT | CLS | Speed Index | Transfer |';
+          const divider = '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |';
+          const lines = rows.map(r => `| ${r.profile} | ${r.performance} | ${r.accessibility} | ${r.bestPractices} | ${r.seo} | ${r.fcp} | ${r.lcp} | ${r.tbt} | ${r.cls} | ${r.speedIndex} | ${(r.bytes / 1024).toFixed(1)} KiB |`);
+          const markdown = ['# Lighthouse baseline', '', header, divider, ...lines, ''].join('\n');
+          fs.writeFileSync('lighthouse-results/summary.md', markdown);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
+          console.log(markdown);
+          JS
+
+      - name: Upload Lighthouse artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-performance-baseline
+          path: lighthouse-results/*
+          if-no-files-found: error
+          retention-days: 30
