@@ -1,7 +1,7 @@
 # V2 Phase A — Art Direction Release
 
 ## Purpose
-Document the first production-facing V2 visual upgrade and the evidence used to approve it for rollout.
+Document the first production-facing V2 visual upgrade and the evidence used to approve and release it.
 
 ## Scope
 Phase A changes presentation and hierarchy while preserving the approved Ainos Ventures content, bilingual information architecture, metadata, contact wiring and lightweight static architecture.
@@ -17,27 +17,31 @@ Phase A changes presentation and hierarchy while preserving the approved Ainos V
 - Contact close given stronger architectural scale
 
 ## Implementation
-- Production-facing Phase A styles are integrated into `assets/css/team-tuning.css`, which is already loaded by both `/en/` and `/tr/`.
+- Production-facing Phase A styles are integrated into `assets/css/team-tuning.css`, which is loaded by both `/en/` and `/tr/`.
 - No production copy, canonical metadata, Organization semantics, social metadata, contact details or founder facts were changed as part of the visual rollout.
 - The branded 404 page remains outside the Phase A visual override because it does not load `team-tuning.css`.
 - Temporary prototype pages, prototype stylesheet and prototype-only workflow were removed before merge.
 
 ## QA evidence
-### Prototype review
-- EN/TR prototype reviewed at 1440 / 1024 / 768 / 390 / 360 px.
+### Prototype and production-candidate review
+- EN/TR reviewed at 1440 / 1024 / 768 / 390 / 360 px.
 - No horizontal overflow found.
 - Direction accepted for hero, Current Focus, Markets & Reach and portrait-led Team.
+- Candidate Site Quality: PASS
+- Candidate bilingual visual QA: PASS
+- Candidate Vercel preview deployment: PASS
 
-### Production candidate
-Candidate commit: `ac78c2c63d96cc2e15578b81acf6fc1d94814f83`
+### Production release
+Merge commit: `3a395a9e9a51cd43a94c5bb268839311b8df01ff`
 
-- Site Quality: PASS
-- Bilingual V2 production-candidate visual QA: PASS
-- Vercel preview deployment: PASS
-- Screenshot artifact included EN/TR Hero, What We Do / Ne Yapıyoruz, Current Focus / Güncel Odak, Markets & Reach / Pazarlar & erişim and Team / Ekip across all five breakpoints.
+- Site Quality run 133: PASS
+- Responsive Visual QA run 19: PASS
+- Production Smoke run 61: PASS
+- Vercel production deployment: PASS
+- Responsive visual artifact generated after merge and reviewed for EN/TR desktop/mobile composition
 
 ## Persistent regression protection
-`responsive-visual-qa.yml` now retains the existing no-JavaScript and 404 checks and additionally asserts:
+`responsive-visual-qa.yml` retains the existing no-JavaScript and 404 checks and additionally asserts:
 - no horizontal overflow on key breakpoints
 - editorial zero-radius hero shell
 - four Current Focus rows with zero-radius presentation
@@ -45,11 +49,7 @@ Candidate commit: `ac78c2c63d96cc2e15578b81acf6fc1d94814f83`
 - two Markets & Reach panels with non-pill presentation
 - expanded screenshots for Hero, What, Focus, Markets and Team in both languages
 
-## Release gate
-Phase A is not considered fully released until the merge commit on `main` passes:
-1. Site Quality
-2. Responsive Visual QA
-3. Production Smoke
-4. Vercel deployment
+## Release status
+**Phase A is released and production-validated.**
 
-After that gate, Phase B interaction polish can begin.
+Phase B interaction polish now proceeds on `v2-phase-b-interactions`.
