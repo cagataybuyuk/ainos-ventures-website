@@ -1,6 +1,6 @@
 # V2 — Status
 
-Status: **Phase A released / Phase B production candidate ready for release approval**
+Status: **Phase A + Phase B released to production / Phase C queued**
 
 ## Phase A — released
 - Current-site visual audit and external benchmark pass completed
@@ -10,20 +10,12 @@ Status: **Phase A released / Phase B production candidate ready for release appr
 - Temporary prototype-only assets removed before merge
 - Persistent responsive QA extended with V2 visual contracts
 
-Production merge commit: `3a395a9e9a51cd43a94c5bb268839311b8df01ff`
+Phase A production merge commit: `3a395a9e9a51cd43a94c5bb268839311b8df01ff`
 
-Release gate on `main`:
-- Site Quality: PASS
-- Responsive Visual QA: PASS
-- Production Smoke: PASS
-- Vercel production deployment: PASS
-- Post-merge screenshot artifact reviewed for desktop and mobile composition
+## Phase B — released
+PR #13 `V2 Phase B — interaction polish` merged to `main`.
 
-## Phase B — production candidate
-Branch: `v2-phase-b-interactions`
-PR: #13 `V2 Phase B — interaction polish`
-
-Implemented:
+Released interaction scope:
 - compact sticky-navigation state after scroll
 - active-section indication with semantic `aria-current="location"`
 - synchronized desktop/mobile section tracking
@@ -33,17 +25,19 @@ Implemented:
 - explicit reduced-motion fallbacks
 - persistent interaction/accessibility regression checks
 
-Candidate QA:
-- Site Quality: PASS
-- Responsive Visual QA: PASS
-- V2 interaction contracts: PASS
-- Vercel preview deployment: PASS
-- EN/TR responsive artifact reviewed at desktop and mobile widths
+Phase B production merge commit: `8a2e4491fc92e0233836c2024c3a7a30b1c08364`
 
-Phase B has not been merged to `main` yet. The next step is explicit production release approval, then post-merge Site Quality, Responsive Visual QA, Production Smoke and Vercel verification.
+Production release gate:
+- Site Quality run 139: PASS
+- Responsive Visual QA run 25: PASS
+- Production Smoke run 62: PASS
+- Vercel production deployment: PASS
+- EN/TR post-merge responsive artifact generated and visually reviewed
+
+The release preserves approved copy, public facts, metadata, contact wiring, strict CSP and the lightweight static architecture.
 
 ## Phase C — queued
-Prepare reusable Ainos Intelligence article and index/archive patterns, but keep them unpublished until real approved content exists.
+Prepare reusable Ainos Intelligence article and index/archive patterns, but keep them unpublished until real approved content exists. Phase C should begin only when there is a concrete editorial need or approved content to design around.
 
 ## Parallel monitoring
 Search Console sitemap re-fetch remains separate in Issue #4 and does not block V2.
