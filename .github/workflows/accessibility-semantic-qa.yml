@@ -1,0 +1,142 @@
+name: Accessibility semantic QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - '404.html'
+      - 'assets/css/**'
+      - 'assets/js/**'
+      - '.github/workflows/accessibility-semantic-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - '404.html'
+      - 'assets/css/**'
+      - 'assets/js/**'
+      - '.github/workflows/accessibility-semantic-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  accessibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install accessibility runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 @axe-core/playwright@4.10.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+
+      - name: Start local site
+        shell: bash
+        run: |
+          python3 -m http.server 4173 >/tmp/ainos-a11y-http.log 2>&1 &
+          echo $! > /tmp/ainos-a11y-http.pid
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/en/ >/dev/null; then
+              exit 0
+            fi
+            sleep 0.5
+          done
+          cat /tmp/ainos-a11y-http.log
+          exit 1
+
+      - name: Run WCAG A/AA semantic audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/accessibility
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const AxeBuilder = require('@axe-core/playwright').default;
+          const fs = require('fs');
+
+          const cases = [
+            { name: 'en', path: '/en/', lang: 'en', h1: 'Strategy.' },
+            { name: 'tr', path: '/tr/', lang: 'tr', h1: 'Strategy.' },
+            { name: '404', path: '/404.html', lang: 'en', h1: 'Page not found.' },
+          ];
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const results = [];
+            let failed = false;
+
+            for (const test of cases) {
+              const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+              const url = `http://127.0.0.1:4173${test.path}`;
+              await page.goto(url, { waitUntil: 'networkidle' });
+
+              const semantics = await page.evaluate(() => ({
+                lang: document.documentElement.lang,
+                title: document.title.trim(),
+                mainCount: document.querySelectorAll('main').length,
+                h1Count: document.querySelectorAll('h1').length,
+                h1Text: document.querySelector('h1')?.textContent?.trim() || '',
+                navLabels: [...document.querySelectorAll('nav')].map((el) => el.getAttribute('aria-label') || ''),
+                robots: document.querySelector('meta[name="robots"]')?.getAttribute('content') || '',
+              }));
+
+              const semanticErrors = [];
+              if (semantics.lang !== test.lang) semanticErrors.push(`html lang expected ${test.lang}, got ${semantics.lang}`);
+              if (!semantics.title) semanticErrors.push('document title is empty');
+              if (semantics.mainCount !== 1) semanticErrors.push(`expected one main landmark, got ${semantics.mainCount}`);
+              if (semantics.h1Count !== 1) semanticErrors.push(`expected one h1, got ${semantics.h1Count}`);
+              if (!semantics.h1Text.includes(test.h1)) semanticErrors.push(`unexpected h1: ${semantics.h1Text}`);
+              if (test.name !== '404' && semantics.navLabels.some((label) => !label)) semanticErrors.push('navigation landmark missing accessible label');
+              if (test.name === '404' && !semantics.robots.toLowerCase().includes('noindex')) semanticErrors.push('404 document must remain noindex');
+
+              const axe = await new AxeBuilder({ page })
+                .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+                .analyze();
+
+              const violations = axe.violations.map((v) => ({
+                id: v.id,
+                impact: v.impact,
+                help: v.help,
+                helpUrl: v.helpUrl,
+                nodes: v.nodes.map((n) => ({ target: n.target, failureSummary: n.failureSummary })),
+              }));
+
+              const record = { name: test.name, url, semantics, semanticErrors, violations };
+              results.push(record);
+              fs.writeFileSync(`artifacts/accessibility/${test.name}.json`, JSON.stringify(record, null, 2));
+
+              console.log(`${test.name}: semanticErrors=${semanticErrors.length} axeViolations=${violations.length}`);
+              if (semanticErrors.length || violations.length) {
+                failed = true;
+                for (const error of semanticErrors) console.error(`  semantic: ${error}`);
+                for (const violation of violations) console.error(`  axe: ${violation.id} (${violation.impact}) — ${violation.help}`);
+              }
+
+              await page.close();
+            }
+
+            fs.writeFileSync('artifacts/accessibility/summary.json', JSON.stringify(results, null, 2));
+            await browser.close();
+            if (failed) process.exit(1);
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Upload accessibility artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-semantic-qa
+          path: artifacts/accessibility
+          retention-days: 14
