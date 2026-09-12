@@ -75,7 +75,8 @@ jobs:
             let failed = false;
 
             for (const test of cases) {
-              const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+              const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+              const page = await context.newPage();
               const url = `http://127.0.0.1:4173${test.path}`;
               await page.goto(url, { waitUntil: 'networkidle' });
 
@@ -121,7 +122,7 @@ jobs:
                 for (const violation of violations) console.error(`  axe: ${violation.id} (${violation.impact}) — ${violation.help}`);
               }
 
-              await page.close();
+              await context.close();
             }
 
             fs.writeFileSync('artifacts/accessibility/summary.json', JSON.stringify(results, null, 2));
