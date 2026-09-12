@@ -30,12 +30,13 @@ It also renders the branded 404 recovery page at mobile width.
 - The hero headline must retain a desktop-scale typographic hierarchy.
 - Four Current Focus items and two founder profiles must remain present.
 - The SVG brand mark and both founder images must decode successfully.
+- Lazy founder images are verified after the Team section enters the viewport.
 - The JavaScript-populated footer year must render.
 - Unhandled browser-console and page errors fail the test.
 
 ### Keyboard accessibility
 - The first desktop Tab stop must be the skip-to-content link.
-- The skip link must become visible when focused.
+- The skip link must become visible when focused, allowing for its intentional 160 ms focus transition.
 - Section tracking must continue to mark Current Focus as the current navigation location after scrolling.
 
 ### Mobile/touch interaction
@@ -63,6 +64,39 @@ Across all engines the 404 fixture must:
 
 The real HTTP 404 response code remains protected separately by Production Smoke against the deployed Vercel site.
 
+## Validation result
+
+Final branch validation on commit `61c771e8df7c33544b76287d3a177cee6333c3fa` passed all 15 browser/profile contracts:
+
+| Browser | EN desktop | EN mobile/touch | TR desktop | TR mobile/touch | 404 mobile |
+| --- | --- | --- | --- | --- | --- |
+| Chromium | PASS | PASS | PASS | PASS | PASS |
+| Firefox | PASS | PASS | PASS | PASS | PASS |
+| WebKit | PASS | PASS | PASS | PASS | PASS |
+
+Supporting release checks:
+
+- Cross-browser Device QA run 4 — PASS
+- Site Quality run 160 — PASS
+- Vercel preview deployment — PASS
+
+The final QA artifact contains 12 browser/language/profile screenshots plus the Markdown result summary.
+
+## Audit findings
+
+No reproducible production browser defect was found. The public HTML/CSS/JavaScript/image runtime therefore required no browser-specific change.
+
+Two early test iterations failed for QA-harness reasons and were corrected without changing the website:
+
+1. Founder images use intentional native lazy loading. The first test sampled `naturalWidth` at page load before Team entered the viewport. The runner now scrolls Team into view and waits for successful decode before asserting image health.
+2. The skip-to-content link intentionally animates into view over 160 ms on focus. The first test sampled its transformed bounding box on the same frame as the Tab event. The runner now waits for the settled focused state before asserting visibility.
+
+These corrections make the regression suite test actual user-facing contracts rather than implementation timing.
+
+## Visual review
+
+The generated screenshots were reviewed across the three engines. The site retained its intended editorial structure, founder imagery, typography hierarchy, navigation and mobile layout. Expected engine-level font rasterization and timing differences were not treated as defects. No material layout, overflow, content-loss or brand-integrity issue was identified.
+
 ## Artifact policy
 
 The workflow uploads:
@@ -72,7 +106,7 @@ The workflow uploads:
 - mobile screenshots for EN/TR in each engine;
 - failure screenshots when a contract fails.
 
-Artifacts are diagnostic evidence, not pixel-perfect cross-engine golden images. Small font rasterization or anti-aliasing differences are acceptable; usability, layout integrity and brand structure are the protected contracts.
+Artifacts are diagnostic evidence, not pixel-perfect cross-engine golden images. Small font rasterization, anti-aliasing or transition-capture differences are acceptable; usability, accessibility, layout integrity and brand structure are the protected contracts.
 
 ## Change policy
 
