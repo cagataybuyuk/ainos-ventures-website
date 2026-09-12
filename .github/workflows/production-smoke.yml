@@ -41,7 +41,11 @@ jobs:
           test "$status" = '200'
           grep -q 'Strategy\. Capital\. Partnership\.' "$body"
           grep -q 'Current Focus' "$body"
-          grep -q 'https://ainosventures.com/en/' "$body"
+          grep -Fq '<link rel="canonical" href="https://ainosventures.com/en/">' "$body"
+          grep -Fq '<link rel="alternate" hreflang="en" href="https://ainosventures.com/en/">' "$body"
+          grep -Fq '<link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/">' "$body"
+          grep -Fq '<link rel="alternate" hreflang="x-default" href="https://ainosventures.com/en/">' "$body"
+          grep -Fq '<meta property="og:url" content="https://ainosventures.com/en/">' "$body"
           grep -q '/assets/css/team-tuning.css' "$body"
           grep -q 'Tunca Cingöz' "$body"
           grep -q 'Brings an entrepreneurial and commercial perspective to strategy, business development, investments and long-term partnerships.' "$body"
@@ -49,6 +53,10 @@ jobs:
           grep -q 'Brings a financial and strategic perspective to transactions, capital structuring, transformation and value creation.' "$body"
           grep -q 'https://ainosventures.com/assets/images/ainos-social-card.png' "$body"
           grep -q 'summary_large_image' "$body"
+          if grep -Eqi 'www\.ainosventures\.com|ainos-ventures-website\.vercel\.app' "$body"; then
+            echo 'English production page contains a non-canonical host.'
+            exit 1
+          fi
 
       - name: Turkish production page is current
         shell: bash
@@ -59,7 +67,11 @@ jobs:
           echo "status=$status"
           test "$status" = '200'
           grep -q 'Güncel Odak' "$body"
-          grep -q 'https://ainosventures.com/tr/' "$body"
+          grep -Fq '<link rel="canonical" href="https://ainosventures.com/tr/">' "$body"
+          grep -Fq '<link rel="alternate" hreflang="en" href="https://ainosventures.com/en/">' "$body"
+          grep -Fq '<link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/">' "$body"
+          grep -Fq '<link rel="alternate" hreflang="x-default" href="https://ainosventures.com/en/">' "$body"
+          grep -Fq '<meta property="og:url" content="https://ainosventures.com/tr/">' "$body"
           grep -q '/assets/css/team-tuning.css' "$body"
           grep -q 'Tunca Cingöz' "$body"
           grep -q 'Strateji, iş geliştirme, yatırımlar ve uzun vadeli iş ortaklıklarına girişimci ve ticari bir bakış açısı getirir.' "$body"
@@ -67,6 +79,10 @@ jobs:
           grep -q 'İşlemler, sermaye yapılandırması, dönüşüm ve değer yaratımına finansal ve stratejik bir bakış açısı getirir.' "$body"
           grep -q 'https://ainosventures.com/assets/images/ainos-social-card.png' "$body"
           grep -q 'summary_large_image' "$body"
+          if grep -Eqi 'www\.ainosventures\.com|ainos-ventures-website\.vercel\.app' "$body"; then
+            echo 'Turkish production page contains a non-canonical host.'
+            exit 1
+          fi
 
       - name: WWW redirects to canonical apex
         shell: bash
@@ -106,10 +122,63 @@ jobs:
           set -euo pipefail
           tmp="$(mktemp -d)"
           curl -fsS --connect-timeout 10 --max-time 30 https://ainosventures.com/robots.txt -o "$tmp/robots"
-          grep -q 'https://ainosventures.com/sitemap.xml' "$tmp/robots"
+          grep -Fxq 'User-agent: *' "$tmp/robots"
+          grep -Fxq 'Allow: /' "$tmp/robots"
+          grep -Fxq 'Sitemap: https://ainosventures.com/sitemap.xml' "$tmp/robots"
+          if grep -Fxiq 'Disallow: /' "$tmp/robots"; then
+            echo 'Production robots.txt blocks the entire site.'
+            exit 1
+          fi
+
           curl -fsS --connect-timeout 10 --max-time 30 https://ainosventures.com/sitemap.xml -o "$tmp/sitemap"
-          grep -q 'https://ainosventures.com/en/' "$tmp/sitemap"
-          grep -q 'https://ainosventures.com/tr/' "$tmp/sitemap"
+          python3 - "$tmp/sitemap" <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          path = sys.argv[1]
+          sitemap_ns = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+          xhtml_ns = 'http://www.w3.org/1999/xhtml'
+          expected_urls = {
+              'https://ainosventures.com/en/',
+              'https://ainosventures.com/tr/',
+          }
+          expected_alternates = {
+              'en': 'https://ainosventures.com/en/',
+              'tr': 'https://ainosventures.com/tr/',
+              'x-default': 'https://ainosventures.com/en/',
+          }
+
+          root = ET.parse(path).getroot()
+          if root.tag != f'{{{sitemap_ns}}}urlset':
+              raise SystemExit('Unexpected sitemap root element')
+
+          seen = set()
+          for url_el in root.findall(f'{{{sitemap_ns}}}url'):
+              loc_el = url_el.find(f'{{{sitemap_ns}}}loc')
+              loc = (loc_el.text or '').strip() if loc_el is not None else ''
+              if not loc:
+                  raise SystemExit('Sitemap URL entry missing loc')
+              if loc in seen:
+                  raise SystemExit(f'Duplicate sitemap URL: {loc}')
+              seen.add(loc)
+
+              alternates = {}
+              for link in url_el.findall(f'{{{xhtml_ns}}}link'):
+                  if link.attrib.get('rel') == 'alternate':
+                      alternates[link.attrib.get('hreflang')] = link.attrib.get('href')
+              if alternates != expected_alternates:
+                  raise SystemExit(f'Unexpected hreflang set for {loc}: {alternates}')
+
+          if seen != expected_urls:
+              raise SystemExit(f'Unexpected sitemap URL set: {seen}')
+
+          raw = open(path, encoding='utf-8').read()
+          for forbidden in ('http://ainosventures.com', 'www.ainosventures.com', 'vercel.app'):
+              if forbidden in raw:
+                  raise SystemExit(f'Sitemap contains forbidden host pattern: {forbidden}')
+          print('production sitemap SEO contract=PASS')
+          PY
+
           for url in \
             https://ainosventures.com/assets/css/site-enhancements.css \
             https://ainosventures.com/assets/css/team-tuning.css \
@@ -150,6 +219,10 @@ jobs:
           grep -q 'Türkçe Ana Sayfa' "$body"
           grep -q '/assets/css/site-enhancements.css' "$body"
           grep -qi 'name="robots" content="noindex"' "$body"
+          if grep -qi 'rel="canonical"' "$body"; then
+            echo 'Served 404 must not declare a canonical URL.'
+            exit 1
+          fi
           if grep -qi ' style=' "$body"; then
             echo 'Served 404 unexpectedly contains inline styles.'
             exit 1
