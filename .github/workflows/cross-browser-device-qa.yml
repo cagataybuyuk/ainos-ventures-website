@@ -1,0 +1,75 @@
+name: Cross-browser device QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - '404.html'
+      - 'assets/**'
+      - 'scripts/cross_browser_check.js'
+      - '.github/workflows/cross-browser-device-qa.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - '404.html'
+      - 'assets/**'
+      - 'scripts/cross_browser_check.js'
+      - '.github/workflows/cross-browser-device-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright browsers
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.55.0
+          npx playwright install --with-deps chromium firefox webkit
+
+      - name: Start local site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/ainos-cross-browser-http.log 2>&1 &
+          echo $! > /tmp/ainos-cross-browser-http.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/en/ >/dev/null \
+              && curl -fsS http://127.0.0.1:4173/tr/ >/dev/null \
+              && curl -fsS http://127.0.0.1:4173/404.html >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/ainos-cross-browser-http.log >&2 || true
+          exit 1
+
+      - name: Validate Chromium Firefox and WebKit contracts
+        run: node scripts/cross_browser_check.js
+
+      - name: Upload cross-browser QA artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-browser-device-qa
+          path: cross-browser-results/**
+          if-no-files-found: error
+          retention-days: 14
