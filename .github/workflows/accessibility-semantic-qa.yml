@@ -80,6 +80,9 @@ jobs:
               const url = `http://127.0.0.1:4173${test.path}`;
               await page.goto(url, { waitUntil: 'networkidle' });
 
+              // Audit the intended resting visual state, not a reveal element caught mid-transition.
+              await page.addStyleTag({ content: '.reveal{opacity:1!important;transform:none!important;transition:none!important}' });
+
               const semantics = await page.evaluate(() => ({
                 lang: document.documentElement.lang,
                 title: document.title.trim(),
