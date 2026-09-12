@@ -1,4 +1,4 @@
-:root{--ink:#1c1c1c;--dark:#1c1c1c;--dark-2:#262624}
+:root{--ink:#1c1c1c;--dark:#1c1c1c;--dark-2:#262624;--stone:#6a635b}
 [id]{scroll-margin-top:96px}
 .hero-main,.hero-side,.cap,.work,.panel,.person>*{min-width:0}
 .reveal{opacity:1;transform:none}
