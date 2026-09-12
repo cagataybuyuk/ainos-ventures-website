@@ -36,7 +36,7 @@ It also renders the branded 404 recovery page at mobile width.
 
 ### Keyboard accessibility
 - The first desktop Tab stop must be the skip-to-content link.
-- The skip link must become visible when focused, allowing for its intentional 160 ms focus transition.
+- The skip link must become immediately visible when focused.
 - Section tracking must continue to mark Current Focus as the current navigation location after scrolling.
 
 ### Mobile/touch interaction
@@ -66,36 +66,42 @@ The real HTTP 404 response code remains protected separately by Production Smoke
 
 ## Validation result
 
-Final branch validation passes all 15 browser/profile contracts:
+The release gate requires the final PR head to pass all 15 browser/profile contracts:
 
 | Browser | EN desktop | EN mobile/touch | TR desktop | TR mobile/touch | 404 mobile |
 | --- | --- | --- | --- | --- | --- |
-| Chromium | PASS | PASS | PASS | PASS | PASS |
-| Firefox | PASS | PASS | PASS | PASS | PASS |
-| WebKit | PASS | PASS | PASS | PASS | PASS |
+| Chromium | PASS required | PASS required | PASS required | PASS required | PASS required |
+| Firefox | PASS required | PASS required | PASS required | PASS required | PASS required |
+| WebKit | PASS required | PASS required | PASS required | PASS required | PASS required |
 
-The release gate requires the final PR head to show:
+Supporting release checks must also show:
 
 - Cross-browser Device QA — PASS
 - Site Quality — PASS
+- Responsive Visual QA — PASS when rendered assets change
+- Performance baseline — PASS when rendered assets change
 - Vercel preview deployment — PASS
 
 The cross-browser runner was first stabilized on commit `61c771e8df7c33544b76287d3a177cee6333c3fa`. Its QA artifact contains 12 browser/language/profile screenshots plus the Markdown result summary.
 
 ## Audit findings
 
-No reproducible production browser defect was found. The public HTML/CSS/JavaScript/image runtime therefore required no browser-specific change.
+The browser matrix did not reveal a structural layout or interaction defect in the public site, but it did surface one small accessibility-hardening opportunity and two QA-harness assumptions.
 
-Two early test iterations failed for QA-harness reasons and were corrected without changing the website:
+### Evidence-backed production adjustment
+
+One WebKit run reproduced a state where the skip-to-content link had keyboard focus but remained off-screen longer than the test's focus-visibility window while its transform transition was active. The same contract had passed on another WebKit run, so this was not treated as a broad rendering failure. Because a skip link is an accessibility control whose priority is immediate visibility rather than decorative motion, its 160 ms transform transition was removed. The focus state now appears immediately across engines without changing site layout or content.
+
+### QA-harness corrections
 
 1. Founder images use intentional native lazy loading. The first test sampled `naturalWidth` at page load before Team entered the viewport. The runner now scrolls Team into view and waits for successful decode before asserting image health.
-2. The skip-to-content link intentionally animates into view over 160 ms on focus. The first test sampled its transformed bounding box on the same frame as the Tab event. The runner now waits for the settled focused state before asserting visibility.
+2. The initial skip-link assertion sampled a transformed bounding box on the same frame as focus. The runner now waits for the focused state, while the production skip-link transition itself has been removed to make the accessibility behavior deterministic across engines.
 
 These corrections make the regression suite test actual user-facing contracts rather than implementation timing.
 
 ## Visual review
 
-The generated screenshots were reviewed across the three engines. The site retained its intended editorial structure, founder imagery, typography hierarchy, navigation and mobile layout. Expected engine-level font rasterization and timing differences were not treated as defects. No material layout, overflow, content-loss or brand-integrity issue was identified.
+Generated screenshots are reviewed across the three engines. The protected standard is the intended editorial structure, founder imagery, typography hierarchy, navigation and mobile layout. Expected engine-level font rasterization and anti-aliasing differences are not defects. Material layout, overflow, content-loss, accessibility or brand-integrity differences are release blockers.
 
 ## Artifact policy
 
@@ -110,7 +116,7 @@ Artifacts are diagnostic evidence, not pixel-perfect cross-engine golden images.
 
 ## Change policy
 
-A browser-specific code change should only be made when a defect is reproducible and materially affects usability, accessibility, layout integrity or brand presentation. Cosmetic engine differences that do not affect those areas should not trigger production complexity.
+A browser-specific code change should only be made when a defect is reproducible or when the safer behavior materially improves accessibility, usability, layout integrity or brand presentation. Cosmetic engine differences that do not affect those areas should not trigger production complexity.
 
 ## Release gate
 
