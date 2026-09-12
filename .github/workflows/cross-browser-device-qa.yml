@@ -1,0 +1,314 @@
+name: Cross-browser device QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - '404.html'
+      - 'assets/**'
+      - '.github/workflows/cross-browser-device-qa.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'en/**'
+      - 'tr/**'
+      - '404.html'
+      - 'assets/**'
+      - '.github/workflows/cross-browser-device-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright browsers
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.55.0
+          npx playwright install --with-deps chromium firefox webkit
+
+      - name: Start local site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/ainos-cross-browser-http.log 2>&1 &
+          echo $! > /tmp/ainos-cross-browser-http.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/en/ >/dev/null \
+              && curl -fsS http://127.0.0.1:4173/tr/ >/dev/null \
+              && curl -fsS http://127.0.0.1:4173/404.html >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/ainos-cross-browser-http.log >&2 || true
+          exit 1
+
+      - name: Validate Chromium Firefox and WebKit contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p cross-browser-results/screenshots
+          node <<'JS'
+          const fs = require('fs');
+          const path = require('path');
+          const { chromium, firefox, webkit } = require('playwright');
+
+          const browserTypes = { chromium, firefox, webkit };
+          const base = 'http://127.0.0.1:4173';
+          const rows = [];
+          const failures = [];
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+          function assert(condition, message) {
+            if (!condition) throw new Error(message);
+          }
+
+          async function pageState(page) {
+            return page.evaluate(() => {
+              const hero = document.querySelector('.hero-shell');
+              const brand = document.querySelector('.brand-mark-img');
+              const founders = [...document.querySelectorAll('#team .person-photo')];
+              const h1 = document.querySelector('h1');
+              const root = document.documentElement;
+              const focusCards = document.querySelectorAll('#focus .focus-card');
+              const people = document.querySelectorAll('#team .person');
+              return {
+                overflow: root.scrollWidth - root.clientWidth,
+                heroWidth: hero?.getBoundingClientRect().width || 0,
+                heroHeight: hero?.getBoundingClientRect().height || 0,
+                h1Size: h1 ? parseFloat(getComputedStyle(h1).fontSize) : 0,
+                focusCount: focusCards.length,
+                teamCount: people.length,
+                brandLoaded: Boolean(brand && brand.complete && brand.naturalWidth > 0),
+                founderImagesLoaded: founders.length === 2 && founders.every(img => img.complete && img.naturalWidth > 0),
+                currentYear: document.querySelector('[data-current-year]')?.textContent?.trim() || ''
+              };
+            });
+          }
+
+          async function validateDesktop(browserName, browser, language) {
+            const context = await browser.newContext({
+              viewport: { width: 1440, height: 1000 },
+              reducedMotion: 'no-preference'
+            });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', err => errors.push(String(err)));
+            page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+
+            try {
+              const response = await page.goto(`${base}/${language}/`, { waitUntil: 'networkidle' });
+              assert(response && response.status() === 200, `${language}: expected HTTP 200`);
+              assert(await page.locator('html').getAttribute('lang') === language, `${language}: html lang mismatch`);
+
+              const state = await pageState(page);
+              assert(state.overflow <= 1, `${language}: horizontal overflow ${state.overflow}px`);
+              assert(state.heroWidth > 500 && state.heroHeight > 300, `${language}: hero geometry collapsed`);
+              assert(state.h1Size >= 48, `${language}: hero typography unexpectedly small (${state.h1Size}px)`);
+              assert(state.focusCount === 4, `${language}: expected four Current Focus items`);
+              assert(state.teamCount === 2, `${language}: expected two founder profiles`);
+              assert(state.brandLoaded, `${language}: SVG brand mark failed to render`);
+              assert(state.founderImagesLoaded, `${language}: founder imagery failed to render`);
+              assert(/^20\d{2}$/.test(state.currentYear), `${language}: dynamic footer year was not populated`);
+              assert(errors.length === 0, `${language}: browser console/page errors: ${errors.join(' | ')}`);
+
+              await page.keyboard.press('Tab');
+              const focusState = await page.evaluate(() => {
+                const active = document.activeElement;
+                if (!active) return {};
+                const rect = active.getBoundingClientRect();
+                const style = getComputedStyle(active);
+                return {
+                  href: active.getAttribute('href'),
+                  visible: rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0,
+                  outlineStyle: style.outlineStyle,
+                  outlineWidth: style.outlineWidth
+                };
+              });
+              assert(focusState.href === '#main-content', `${language}: first keyboard stop must be skip-to-content`);
+              assert(focusState.visible, `${language}: focused skip link must become visible`);
+
+              await page.locator('#focus').scrollIntoViewIfNeeded();
+              await sleep(180);
+              const navState = await page.evaluate(() => ({
+                compact: document.querySelector('.nav')?.classList.contains('is-compact') || false,
+                active: document.querySelector('.nav-links a[href="#focus"]')?.getAttribute('aria-current') || ''
+              }));
+              assert(navState.compact, `${language}: sticky navigation did not enter compact state`);
+              assert(navState.active === 'location', `${language}: Current Focus navigation state not tracked`);
+
+              await page.screenshot({
+                path: path.join('cross-browser-results', 'screenshots', `${browserName}-${language}-desktop.png`),
+                fullPage: false
+              });
+
+              rows.push([browserName, language, 'desktop', 'PASS']);
+            } catch (error) {
+              failures.push(`${browserName}/${language}/desktop: ${error.message}`);
+              rows.push([browserName, language, 'desktop', 'FAIL']);
+              await page.screenshot({
+                path: path.join('cross-browser-results', 'screenshots', `${browserName}-${language}-desktop-failure.png`),
+                fullPage: true
+              }).catch(() => {});
+            } finally {
+              await context.close();
+            }
+          }
+
+          async function validateMobile(browserName, browser, language) {
+            const context = await browser.newContext({
+              viewport: { width: 390, height: 844 },
+              hasTouch: true,
+              reducedMotion: 'reduce'
+            });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', err => errors.push(String(err)));
+            page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+
+            try {
+              const response = await page.goto(`${base}/${language}/`, { waitUntil: 'networkidle' });
+              assert(response && response.status() === 200, `${language}: expected HTTP 200`);
+
+              const state = await pageState(page);
+              assert(state.overflow <= 1, `${language}: mobile horizontal overflow ${state.overflow}px`);
+              assert(state.brandLoaded && state.founderImagesLoaded, `${language}: mobile images failed to render`);
+              assert(errors.length === 0, `${language}: browser console/page errors: ${errors.join(' | ')}`);
+
+              const toggle = page.locator('.mobile-menu-toggle');
+              await toggle.waitFor({ state: 'visible' });
+              assert(await toggle.getAttribute('aria-expanded') === 'false', `${language}: mobile menu should start closed`);
+              await toggle.click();
+              assert(await toggle.getAttribute('aria-expanded') === 'true', `${language}: mobile menu did not open`);
+
+              const menu = page.locator('#mobile-navigation');
+              assert(await menu.isVisible(), `${language}: mobile navigation is not visible after opening`);
+              const focusedHref = await page.evaluate(() => document.activeElement?.getAttribute('href') || '');
+              assert(focusedHref.startsWith('#'), `${language}: opening mobile navigation should focus its first section link`);
+
+              await page.locator('#mobile-navigation a[href="#team"]').click();
+              await sleep(220);
+              assert(await toggle.getAttribute('aria-expanded') === 'false', `${language}: mobile menu did not close after section selection`);
+              assert(!(await menu.isVisible()), `${language}: mobile menu remained visible after section selection`);
+
+              await toggle.click();
+              await page.keyboard.press('Escape');
+              assert(await toggle.getAttribute('aria-expanded') === 'false', `${language}: Escape did not close mobile menu`);
+              const restored = await page.evaluate(() => document.activeElement?.classList.contains('mobile-menu-toggle') || false);
+              assert(restored, `${language}: Escape did not restore focus to the mobile toggle`);
+
+              const reducedState = await page.evaluate(() => {
+                const durations = value => value.split(',').map(x => x.trim());
+                const navDurations = durations(getComputedStyle(document.querySelector('.nav')).transitionDuration);
+                const buttonDurations = durations(getComputedStyle(document.querySelector('.btn')).transitionDuration);
+                return {
+                  heroAnimation: getComputedStyle(document.querySelector('.hero-main'), '::before').animationName,
+                  navReduced: navDurations.every(value => value === '0s'),
+                  buttonReduced: buttonDurations.every(value => value === '0s')
+                };
+              });
+              assert(reducedState.heroAnimation === 'none', `${language}: reduced-motion hero animation still active`);
+              assert(reducedState.navReduced, `${language}: reduced-motion nav transition still active`);
+              assert(reducedState.buttonReduced, `${language}: reduced-motion button transition still active`);
+
+              await page.locator('#team').scrollIntoViewIfNeeded();
+              await sleep(100);
+              await page.screenshot({
+                path: path.join('cross-browser-results', 'screenshots', `${browserName}-${language}-mobile.png`),
+                fullPage: false
+              });
+
+              rows.push([browserName, language, 'mobile-touch', 'PASS']);
+            } catch (error) {
+              failures.push(`${browserName}/${language}/mobile: ${error.message}`);
+              rows.push([browserName, language, 'mobile-touch', 'FAIL']);
+              await page.screenshot({
+                path: path.join('cross-browser-results', 'screenshots', `${browserName}-${language}-mobile-failure.png`),
+                fullPage: true
+              }).catch(() => {});
+            } finally {
+              await context.close();
+            }
+          }
+
+          async function validate404(browserName, browser) {
+            const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+            const page = await context.newPage();
+            try {
+              const response = await page.goto(`${base}/404.html`, { waitUntil: 'networkidle' });
+              assert(response && response.status() === 200, 'local 404 fixture should render');
+              const state = await page.evaluate(() => ({
+                robots: document.querySelector('meta[name="robots"]')?.content || '',
+                h1: document.querySelector('h1')?.textContent?.trim() || '',
+                overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+                en: Boolean(document.querySelector('a[href="/en/"]')),
+                tr: Boolean(document.querySelector('a[href="/tr/"]'))
+              }));
+              assert(state.robots.toLowerCase().includes('noindex'), '404 fixture must remain noindex');
+              assert(state.h1 === 'Page not found.', '404 heading changed unexpectedly');
+              assert(state.overflow <= 1, `404 horizontal overflow ${state.overflow}px`);
+              assert(state.en && state.tr, '404 language recovery links missing');
+              rows.push([browserName, 'n/a', '404-mobile', 'PASS']);
+            } catch (error) {
+              failures.push(`${browserName}/404: ${error.message}`);
+              rows.push([browserName, 'n/a', '404-mobile', 'FAIL']);
+            } finally {
+              await context.close();
+            }
+          }
+
+          (async () => {
+            for (const [browserName, browserType] of Object.entries(browserTypes)) {
+              const browser = await browserType.launch({ headless: true });
+              try {
+                for (const language of ['en', 'tr']) {
+                  await validateDesktop(browserName, browser, language);
+                  await validateMobile(browserName, browser, language);
+                }
+                await validate404(browserName, browser);
+              } finally {
+                await browser.close();
+              }
+            }
+
+            const header = '| Browser | Language | Profile | Result |';
+            const divider = '| --- | --- | --- | --- |';
+            const lines = rows.map(row => `| ${row.join(' | ')} |`);
+            const failureLines = failures.length ? ['', '## Failures', '', ...failures.map(x => `- ${x}`)] : [];
+            const markdown = ['# Cross-browser device QA', '', header, divider, ...lines, ...failureLines, ''].join('\n');
+            fs.writeFileSync('cross-browser-results/summary.md', markdown);
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
+            console.log(markdown);
+
+            if (failures.length) process.exit(1);
+          })().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
+          JS
+
+      - name: Upload cross-browser QA artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-browser-device-qa
+          path: cross-browser-results/**
+          if-no-files-found: error
+          retention-days: 14
