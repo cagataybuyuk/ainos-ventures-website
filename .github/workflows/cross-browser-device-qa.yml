@@ -84,7 +84,6 @@ jobs:
             return page.evaluate(() => {
               const hero = document.querySelector('.hero-shell');
               const brand = document.querySelector('.brand-mark-img');
-              const founders = [...document.querySelectorAll('#team .person-photo')];
               const h1 = document.querySelector('h1');
               const root = document.documentElement;
               const focusCards = document.querySelectorAll('#focus .focus-card');
@@ -97,10 +96,28 @@ jobs:
                 focusCount: focusCards.length,
                 teamCount: people.length,
                 brandLoaded: Boolean(brand && brand.complete && brand.naturalWidth > 0),
-                founderImagesLoaded: founders.length === 2 && founders.every(img => img.complete && img.naturalWidth > 0),
                 currentYear: document.querySelector('[data-current-year]')?.textContent?.trim() || ''
               };
             });
+          }
+
+          async function validateFounderImages(page, language) {
+            await page.locator('#team').scrollIntoViewIfNeeded();
+            await page.waitForFunction(() => {
+              const founders = [...document.querySelectorAll('#team .person-photo')];
+              return founders.length === 2 && founders.every(img => img.complete && img.naturalWidth > 0);
+            }, null, { timeout: 5000 });
+
+            const imageState = await page.evaluate(() => [...document.querySelectorAll('#team .person-photo')].map(img => ({
+              src: img.getAttribute('src'),
+              complete: img.complete,
+              naturalWidth: img.naturalWidth,
+              naturalHeight: img.naturalHeight
+            })));
+            assert(
+              imageState.length === 2 && imageState.every(img => img.complete && img.naturalWidth > 0 && img.naturalHeight > 0),
+              `${language}: lazy founder imagery failed after Team entered the viewport`
+            );
           }
 
           async function validateDesktop(browserName, browser, language) {
@@ -125,7 +142,6 @@ jobs:
               assert(state.focusCount === 4, `${language}: expected four Current Focus items`);
               assert(state.teamCount === 2, `${language}: expected two founder profiles`);
               assert(state.brandLoaded, `${language}: SVG brand mark failed to render`);
-              assert(state.founderImagesLoaded, `${language}: founder imagery failed to render`);
               assert(/^20\d{2}$/.test(state.currentYear), `${language}: dynamic footer year was not populated`);
               assert(errors.length === 0, `${language}: browser console/page errors: ${errors.join(' | ')}`);
 
@@ -134,12 +150,9 @@ jobs:
                 const active = document.activeElement;
                 if (!active) return {};
                 const rect = active.getBoundingClientRect();
-                const style = getComputedStyle(active);
                 return {
                   href: active.getAttribute('href'),
-                  visible: rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0,
-                  outlineStyle: style.outlineStyle,
-                  outlineWidth: style.outlineWidth
+                  visible: rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0
                 };
               });
               assert(focusState.href === '#main-content', `${language}: first keyboard stop must be skip-to-content`);
@@ -154,6 +167,9 @@ jobs:
               assert(navState.compact, `${language}: sticky navigation did not enter compact state`);
               assert(navState.active === 'location', `${language}: Current Focus navigation state not tracked`);
 
+              await validateFounderImages(page, language);
+              assert(errors.length === 0, `${language}: browser console/page errors after lazy image load: ${errors.join(' | ')}`);
+              await sleep(100);
               await page.screenshot({
                 path: path.join('cross-browser-results', 'screenshots', `${browserName}-${language}-desktop.png`),
                 fullPage: false
@@ -189,7 +205,7 @@ jobs:
 
               const state = await pageState(page);
               assert(state.overflow <= 1, `${language}: mobile horizontal overflow ${state.overflow}px`);
-              assert(state.brandLoaded && state.founderImagesLoaded, `${language}: mobile images failed to render`);
+              assert(state.brandLoaded, `${language}: mobile SVG brand mark failed to render`);
               assert(errors.length === 0, `${language}: browser console/page errors: ${errors.join(' | ')}`);
 
               const toggle = page.locator('.mobile-menu-toggle');
@@ -228,7 +244,8 @@ jobs:
               assert(reducedState.navReduced, `${language}: reduced-motion nav transition still active`);
               assert(reducedState.buttonReduced, `${language}: reduced-motion button transition still active`);
 
-              await page.locator('#team').scrollIntoViewIfNeeded();
+              await validateFounderImages(page, language);
+              assert(errors.length === 0, `${language}: browser console/page errors after lazy image load: ${errors.join(' | ')}`);
               await sleep(100);
               await page.screenshot({
                 path: path.join('cross-browser-results', 'screenshots', `${browserName}-${language}-mobile.png`),
