@@ -66,7 +66,7 @@ The real HTTP 404 response code remains protected separately by Production Smoke
 
 ## Validation result
 
-Final branch validation on commit `61c771e8df7c33544b76287d3a177cee6333c3fa` passed all 15 browser/profile contracts:
+Final branch validation passed all 15 browser/profile contracts:
 
 | Browser | EN desktop | EN mobile/touch | TR desktop | TR mobile/touch | 404 mobile |
 | --- | --- | --- | --- | --- | --- |
@@ -74,13 +74,13 @@ Final branch validation on commit `61c771e8df7c33544b76287d3a177cee6333c3fa` pas
 | Firefox | PASS | PASS | PASS | PASS | PASS |
 | WebKit | PASS | PASS | PASS | PASS | PASS |
 
-Supporting release checks:
+Supporting release checks on the final documentation head:
 
-- Cross-browser Device QA run 4 — PASS
-- Site Quality run 160 — PASS
+- Cross-browser Device QA run 5 — PASS
+- Site Quality run 161 — PASS
 - Vercel preview deployment — PASS
 
-The final QA artifact contains 12 browser/language/profile screenshots plus the Markdown result summary.
+The validated cross-browser runner itself was introduced and first stabilized on commit `61c771e8df7c33544b76287d3a177cee6333c3fa`. The final QA artifact contains 12 browser/language/profile screenshots plus the Markdown result summary.
 
 ## Audit findings
 
