@@ -169,10 +169,10 @@ html.js .reveal.visible{opacity:1;transform:none}
 }
 
 /* Ainos visual refresh */
-.hero-main{justify-content:space-between}
+.hero-main{justify-content:flex-start}
 .hero-main-copy{display:flex;flex-direction:column}
-.hero-visual{margin:38px 0 0;border:1px solid rgba(17,20,23,.1);border-radius:22px;overflow:hidden;background:var(--dark);position:relative;isolation:isolate}
-.hero-visual img{width:100%;aspect-ratio:16/7;object-fit:cover;object-position:center;filter:saturate(.82) contrast(1.02)}
+.hero-visual{margin:32px 0 0;border:1px solid rgba(17,20,23,.1);border-radius:22px;overflow:hidden;background:var(--dark);position:relative;isolation:isolate}
+.hero-visual img{width:100%;height:clamp(260px,26vw,360px);aspect-ratio:auto;object-fit:cover;object-position:center;filter:saturate(.82) contrast(1.02)}
 .hero-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,20,23,0) 48%,rgba(17,20,23,.55) 100%);pointer-events:none}
 .hero-visual figcaption{position:absolute;z-index:1;left:16px;right:16px;bottom:14px;display:flex;justify-content:space-between;gap:14px;color:#f5f2eb;font-size:10px;letter-spacing:.13em;text-transform:uppercase}
 .hero-visual figcaption span:first-child{color:#d8a45d}
@@ -196,7 +196,7 @@ html.js .reveal.visible{opacity:1;transform:none}
 }
 @media(max-width:650px){
   .hero-visual{margin-top:30px}
-  .hero-visual img{aspect-ratio:16/9}
+  .hero-visual img{height:clamp(220px,54vw,340px);aspect-ratio:auto}
   .hero-visual figcaption{font-size:9px;left:12px;right:12px;bottom:11px}
   .insight-card{grid-template-columns:1fr;padding:12px}
   .insight-card-media{min-height:0;aspect-ratio:16/9}
