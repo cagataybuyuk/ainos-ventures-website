@@ -235,3 +235,25 @@ main > section#contact{padding-top:108px;padding-bottom:108px}
   main > section#team{padding-top:72px;padding-bottom:72px}
   main > section#contact{padding-top:88px;padding-bottom:88px}
 }
+
+/* Capability icon and control refinement */
+.btn{gap:10px;min-height:50px;padding:0 14px 0 18px;border-radius:14px}
+.btn-icon{width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.12);transition:transform .18s ease,background .18s ease}
+.btn-icon svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+.btn.ghost .btn-icon{background:rgba(17,20,23,.065)}
+.btn:hover .btn-icon{transform:translateX(2px)}
+.contact .btn-icon{background:rgba(236,232,223,.12)}
+.contact .company-link .btn-icon{background:rgba(236,232,223,.08)}
+.cap{position:relative;overflow:hidden}
+.cap-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.cap-visual{width:56px;height:56px;display:grid;place-items:center;border:1px solid rgba(100,113,104,.38);border-radius:17px;background:linear-gradient(145deg,rgba(220,226,220,.72),rgba(248,246,241,.78));color:var(--sage)}
+.cap-icon{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
+.cap .section-kicker{margin-top:7px;margin-bottom:0}
+.cap h3{margin-top:22px}
+.cap.full .cap-head{align-items:flex-start}
+.cap.full .cap-visual{background:linear-gradient(145deg,rgba(216,224,217,.88),rgba(248,246,241,.78))}
+@media(max-width:650px){
+  .btn{min-height:48px}
+  .cap-visual{width:52px;height:52px;border-radius:15px}
+  .cap-icon{width:31px;height:31px}
+}
