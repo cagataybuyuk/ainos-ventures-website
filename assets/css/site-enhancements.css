@@ -16,7 +16,18 @@ html.js .reveal.visible{opacity:1;transform:none}
 .person:hover .person-photo{transform:scale(1.012);filter:saturate(.98) contrast(1)}
 .person-no{margin-bottom:32px}
 .current-focus-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-.focus-card{min-height:320px}
+.focus-card{min-height:320px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:linear-gradient(155deg,#171b1f 0%,#20262b 64%,#27312e 100%);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.focus-card:before{content:"";position:absolute;inset:auto -72px -88px auto;width:230px;height:230px;border:1px solid rgba(216,164,93,.16);border-radius:50%;pointer-events:none}
+.focus-card:hover{transform:translateY(-3px);border-color:rgba(216,164,93,.34);box-shadow:0 22px 44px rgba(17,20,23,.14)}
+.focus-card > *{position:relative;z-index:1}
+.focus-card .work-topline{align-items:center}
+.focus-card-icon{width:50px;height:50px;display:grid;place-items:center;flex:0 0 auto;border:1px solid rgba(216,164,93,.38);border-radius:15px;background:rgba(216,164,93,.07);color:#d8a45d;transition:background .22s ease,color .22s ease,transform .22s ease}
+.focus-card-icon svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.focus-card:hover .focus-card-icon{background:rgba(216,164,93,.14);transform:translateY(-1px)}
+.focus-industrial .focus-card-icon{color:#b7c8bd;border-color:rgba(183,200,189,.35);background:rgba(183,200,189,.07)}
+.focus-consumer .focus-card-icon{color:#e6d4b8;border-color:rgba(230,212,184,.34);background:rgba(230,212,184,.07)}
+.focus-digital .focus-card-icon{color:#b4c7cb;border-color:rgba(180,199,203,.34);background:rgba(180,199,203,.07)}
+.focus-card .work-role{font-size:12px;letter-spacing:.01em}
 .focus-title{font-size:clamp(28px,2.5vw,38px);line-height:1.02;font-weight:500;margin:0;letter-spacing:-.035em}
 .person-link{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);width:max-content;border-bottom:1px solid var(--line-strong);padding-bottom:3px}
 .person-link:hover{color:var(--ink)}
@@ -86,6 +97,9 @@ html.js .reveal.visible{opacity:1;transform:none}
   .person-photo-wrap{margin:-22px -22px 24px;aspect-ratio:5/4}
   .work{min-height:340px}
   .focus-card{min-height:250px}
+  .focus-card .work-topline{display:flex;align-items:flex-start;justify-items:initial}
+  .focus-card-icon{width:46px;height:46px;border-radius:14px}
+  .focus-card-icon svg{width:25px;height:25px}
   .work-topline{display:grid;justify-items:start}
   .work-status{white-space:normal}
   .work-metric{font-size:39px;margin-top:26px}
