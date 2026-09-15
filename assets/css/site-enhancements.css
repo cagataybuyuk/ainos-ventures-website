@@ -128,6 +128,11 @@ html.js .reveal.visible{opacity:1;transform:none}
 .article-body{font-size:17px;line-height:1.72;color:#303531}
 .article-body p{margin:0 0 24px}
 .article-body .article-lead{font-size:21px;line-height:1.58;color:var(--text);margin-bottom:48px}
+.article-signal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:-8px 0 52px}
+.article-signal{display:flex;flex-direction:column;gap:13px;min-height:178px;padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.34)}
+.article-signal-index{font-size:10px;letter-spacing:.14em;color:var(--muted)}
+.article-signal strong{font-size:18px;line-height:1.08;font-weight:500;letter-spacing:-.02em}
+.article-signal span:last-child{margin-top:auto;font-size:13px;line-height:1.45;color:var(--muted)}
 .article-body h2{font-size:clamp(32px,4vw,48px);line-height:1.02;margin:58px 0 20px}
 .article-body h3{font-size:23px;line-height:1.12;margin:38px 0 12px;letter-spacing:-.025em}
 .article-body ul{margin:0 0 30px;padding-left:24px}
@@ -154,6 +159,8 @@ html.js .reveal.visible{opacity:1;transform:none}
   .article-dek{font-size:19px}
   .article-body{font-size:16px;line-height:1.67}
   .article-body .article-lead{font-size:19px}
+  .article-signal-grid{grid-template-columns:1fr 1fr;margin-bottom:44px}
+  .article-signal:last-child{grid-column:1 / -1;min-height:150px}
   .article-body h2{font-size:35px;margin-top:44px}
   .article-body h3{font-size:21px}
   .article-callout{padding:23px 20px}
