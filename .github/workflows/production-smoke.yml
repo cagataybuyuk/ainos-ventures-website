@@ -141,11 +141,30 @@ jobs:
           expected_urls = {
               'https://ainosventures.com/en/',
               'https://ainosventures.com/tr/',
+              'https://ainosventures.com/en/intelligence/turkiye-regional-platform/',
+              'https://ainosventures.com/tr/intelligence/turkiye-regional-platform/',
           }
-          expected_alternates = {
-              'en': 'https://ainosventures.com/en/',
-              'tr': 'https://ainosventures.com/tr/',
-              'x-default': 'https://ainosventures.com/en/',
+          expected_alternates_by_url = {
+              'https://ainosventures.com/en/': {
+                  'en': 'https://ainosventures.com/en/',
+                  'tr': 'https://ainosventures.com/tr/',
+                  'x-default': 'https://ainosventures.com/en/',
+              },
+              'https://ainosventures.com/tr/': {
+                  'en': 'https://ainosventures.com/en/',
+                  'tr': 'https://ainosventures.com/tr/',
+                  'x-default': 'https://ainosventures.com/en/',
+              },
+              'https://ainosventures.com/en/intelligence/turkiye-regional-platform/': {
+                  'en': 'https://ainosventures.com/en/intelligence/turkiye-regional-platform/',
+                  'tr': 'https://ainosventures.com/tr/intelligence/turkiye-regional-platform/',
+                  'x-default': 'https://ainosventures.com/en/intelligence/turkiye-regional-platform/',
+              },
+              'https://ainosventures.com/tr/intelligence/turkiye-regional-platform/': {
+                  'en': 'https://ainosventures.com/en/intelligence/turkiye-regional-platform/',
+                  'tr': 'https://ainosventures.com/tr/intelligence/turkiye-regional-platform/',
+                  'x-default': 'https://ainosventures.com/en/intelligence/turkiye-regional-platform/',
+              },
           }
 
           root = ET.parse(path).getroot()
@@ -166,6 +185,9 @@ jobs:
               for link in url_el.findall(f'{{{xhtml_ns}}}link'):
                   if link.attrib.get('rel') == 'alternate':
                       alternates[link.attrib.get('hreflang')] = link.attrib.get('href')
+              expected_alternates = expected_alternates_by_url.get(loc)
+              if expected_alternates is None:
+                  raise SystemExit(f'Unexpected sitemap URL: {loc}')
               if alternates != expected_alternates:
                   raise SystemExit(f'Unexpected hreflang set for {loc}: {alternates}')
 
@@ -184,7 +206,9 @@ jobs:
             https://ainosventures.com/assets/css/team-tuning.css \
             https://ainosventures.com/assets/images/tunca-web.jpg \
             https://ainosventures.com/assets/images/nidan-web.jpg \
-            https://ainosventures.com/assets/images/ainos-social-card.png; do
+            https://ainosventures.com/assets/images/ainos-social-card.png \
+            https://ainosventures.com/assets/images/hero-platform.webp \
+            https://ainosventures.com/assets/images/intelligence-infrastructure.webp; do
             status="$(curl -sS --connect-timeout 10 --max-time 30 -o /dev/null -w '%{http_code}' "$url")"
             echo "$url -> $status"
             test "$status" = '200'
@@ -234,23 +258,3 @@ jobs:
           set -euo pipefail
           headers="$(mktemp)"
           curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null https://ainos-ventures-website.vercel.app/en/
-          status="$(awk 'toupper($1) ~ /^HTTP\// {code=$2} END {print code}' "$headers")"
-          location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
-          robots="$(awk 'BEGIN{IGNORECASE=1} /^x-robots-tag:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
-          vercel_error="$(awk 'BEGIN{IGNORECASE=1} /^x-vercel-error:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r$/,""); print}' "$headers" | tail -1)"
-          echo "status=$status location=$location x-robots-tag=$robots x-vercel-error=$vercel_error"
-
-          if echo "$robots" | grep -qi 'noindex'; then
-            exit 0
-          fi
-
-          case "$status:$location" in
-            301:https://ainosventures.com/*|302:https://ainosventures.com/*|307:https://ainosventures.com/*|308:https://ainosventures.com/*) exit 0 ;;
-          esac
-
-          if [ "$status" = '404' ] && [ "$vercel_error" = 'DEPLOYMENT_NOT_FOUND' ]; then
-            exit 0
-          fi
-
-          echo 'Legacy staging must be noindex, redirect to production, or remain unavailable.'
-          exit 1
