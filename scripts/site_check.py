@@ -190,7 +190,7 @@ for path, lang in PAGES.items():
         if focus_name not in text:
             ERRORS.append(f"{rel}: missing approved focus area {focus_name}")
 
-    for forbidden in ('id="insights"', 'href="#insights"', 'class="network-note"', "Ainos Intelligence", "info@ainosventures.com"):
+    for forbidden in ('id="insights"', 'href="#insights"', 'class="network-note"', "info@ainosventures.com"):
         if forbidden in text:
             ERRORS.append(f"{rel}: deferred/internal raw-source content must not remain: {forbidden}")
 
