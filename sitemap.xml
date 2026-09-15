@@ -12,4 +12,17 @@
     <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ainosventures.com/en/" />
   </url>
+
+  <url>
+    <loc>https://ainosventures.com/en/intelligence/turkiye-regional-platform/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ainosventures.com/en/intelligence/turkiye-regional-platform/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/intelligence/turkiye-regional-platform/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ainosventures.com/en/intelligence/turkiye-regional-platform/" />
+  </url>
+  <url>
+    <loc>https://ainosventures.com/tr/intelligence/turkiye-regional-platform/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ainosventures.com/en/intelligence/turkiye-regional-platform/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://ainosventures.com/tr/intelligence/turkiye-regional-platform/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ainosventures.com/en/intelligence/turkiye-regional-platform/" />
+  </url>
 </urlset>

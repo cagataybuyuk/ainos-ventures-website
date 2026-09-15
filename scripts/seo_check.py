@@ -18,6 +18,26 @@ ALTERNATES = {
 }
 SITEMAP_URL = "https://ainosventures.com/sitemap.xml"
 
+ARTICLE_ROUTES = {
+    "en/intelligence/turkiye-regional-platform": {
+        "canonical": "https://ainosventures.com/en/intelligence/turkiye-regional-platform/",
+        "alternates": {
+            "en": "https://ainosventures.com/en/intelligence/turkiye-regional-platform/",
+            "tr": "https://ainosventures.com/tr/intelligence/turkiye-regional-platform/",
+            "x-default": "https://ainosventures.com/en/intelligence/turkiye-regional-platform/",
+        },
+    },
+    "tr/intelligence/turkiye-regional-platform": {
+        "canonical": "https://ainosventures.com/tr/intelligence/turkiye-regional-platform/",
+        "alternates": {
+            "en": "https://ainosventures.com/en/intelligence/turkiye-regional-platform/",
+            "tr": "https://ainosventures.com/tr/intelligence/turkiye-regional-platform/",
+            "x-default": "https://ainosventures.com/en/intelligence/turkiye-regional-platform/",
+        },
+    },
+}
+
+
 
 class SeoParser(HTMLParser):
     def __init__(self):
@@ -77,6 +97,30 @@ for lang, expected_canonical in CANONICAL.items():
         ERRORS.append(f"/{lang}/ contains a non-canonical host in public metadata/source")
 
 
+
+for route, config in ARTICLE_ROUTES.items():
+    path = ROOT / route / "index.html"
+    if not path.exists():
+        ERRORS.append(f"missing intelligence page: /{route}/")
+        continue
+
+    text = path.read_text(encoding="utf-8")
+    page = parse_html(path)
+
+    if page.html_lang != route.split("/", 1)[0]:
+        ERRORS.append(f"/{route}/ html lang does not match route")
+    if page.canonical != config["canonical"]:
+        ERRORS.append(f"/{route}/ canonical must be {config['canonical']}")
+    if page.og_url != config["canonical"]:
+        ERRORS.append(f"/{route}/ og:url must match canonical")
+    if page.alternates != config["alternates"]:
+        ERRORS.append(f"/{route}/ hreflang set must be exactly {config['alternates']}, found {page.alternates}")
+    if page.robots and "noindex" in page.robots.lower():
+        ERRORS.append(f"/{route}/ must remain indexable")
+    if "www.ainosventures.com" in text or "ainos-ventures-website.vercel.app" in text:
+        ERRORS.append(f"/{route}/ contains a non-canonical host in public metadata/source")
+
+
 sitemap_path = ROOT / "sitemap.xml"
 if not sitemap_path.exists():
     ERRORS.append("missing sitemap.xml")
@@ -116,10 +160,15 @@ else:
                     ERRORS.append(f"{loc}: duplicate sitemap hreflang {hreflang}")
                 alternates[hreflang] = href
 
-            if alternates != ALTERNATES:
-                ERRORS.append(f"{loc}: sitemap hreflang set must be exactly {ALTERNATES}, found {alternates}")
+            expected_alternates = ALTERNATES
+            for route_config in ARTICLE_ROUTES.values():
+                if loc == route_config["canonical"]:
+                    expected_alternates = route_config["alternates"]
+                    break
+            if alternates != expected_alternates:
+                ERRORS.append(f"{loc}: sitemap hreflang set must be exactly {expected_alternates}, found {alternates}")
 
-        expected_urls = set(CANONICAL.values())
+        expected_urls = set(CANONICAL.values()) | {config["canonical"] for config in ARTICLE_ROUTES.values()}
         if seen != expected_urls:
             ERRORS.append(f"sitemap canonical URL set must be exactly {sorted(expected_urls)}, found {sorted(seen)}")
 
