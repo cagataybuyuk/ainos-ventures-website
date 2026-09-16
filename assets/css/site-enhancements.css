@@ -39,7 +39,7 @@ html.js .reveal.visible{opacity:1;transform:none}
 .engagement-panel .panel-title{color:#aeb4b1}
 .engagement-list{grid-template-columns:1fr;gap:0;counter-reset:engagement}
 .engagement-list div{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:12px;min-height:64px;padding:12px 0;border-top-color:rgba(255,255,255,.14);color:#d5d8d4;font-size:15px}
-.engagement-list div:before{content:counter(engagement,decimal-leading-zero);counter-increment:engagement;display:grid;place-items:center;width:28px;height:28px;border:1px solid rgba(216,164,93,.42);border-radius:50%;color:#d8a45d;font-size:10px;letter-spacing:.04em}
+.engagement-list div:before{content:counter(engagement,decimal-leading-zero);counter-increment:engagement;display:grid;place-items:center;width:28px;height:28px;border:1px solid rgba(216,164,93,.42);border-radius:50%;background:#252b2e;color:#d8a45d;font-size:10px;letter-spacing:.04em}
 .focus-title{font-size:clamp(28px,2.5vw,38px);line-height:1.02;font-weight:500;margin:0;letter-spacing:-.035em}
 .person-link{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);width:max-content;border-bottom:1px solid var(--line-strong);padding-bottom:3px}
 .person-link:hover{color:var(--ink)}
