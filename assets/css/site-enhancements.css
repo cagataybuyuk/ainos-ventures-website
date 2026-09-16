@@ -295,6 +295,45 @@ main > section#intelligence .insight-link:focus-visible{outline-color:#d8a45d}
   main > section#intelligence .insight-badge{grid-column:auto;margin:0 8px 8px;justify-self:start}
 }
 
+/* Team + contact: close the page with a measured alternating rhythm. */
+main > section#team .person-photo-wrap{border-radius:18px}
+main > section#team .person:nth-child(2) .person-photo-wrap{grid-column:3;grid-row:1/7}
+main > section#team .person:nth-child(2) .person-no{grid-column:2;text-align:right}
+main > section#team .person:nth-child(2) h3,
+main > section#team .person:nth-child(2) .person-role,
+main > section#team .person:nth-child(2) p,
+main > section#team .person:nth-child(2) .person-tags,
+main > section#team .person:nth-child(2) .person-link{grid-column:1;text-align:right}
+main > section#team .person:nth-child(2) p{margin-left:auto}
+main > section#team .person:nth-child(2) .person-tags{justify-content:flex-end}
+main > section#team .person:nth-child(2) .person-link{margin-left:auto}
+main > section#contact .contact-actions{border-top:1px solid rgba(255,255,255,.16);padding-top:22px;max-width:900px}
+main > section#contact .contact-actions .btn:first-child{background:#ece8df;color:#171b1f;border-color:#ece8df}
+main > section#contact .contact-actions .btn:first-child .btn-icon{background:rgba(23,27,31,.1)}
+main > section#contact .contact-actions .btn:first-child:hover{background:#fff;color:#171b1f;border-color:#fff}
+main > section#contact .contact-actions .company-link{border-color:rgba(236,232,223,.55)}
+@media(max-width:760px){
+  main > section#team .person:nth-child(2) .person-photo-wrap{grid-column:1/3;grid-row:auto}
+  main > section#team .person:nth-child(2) .person-no{grid-column:1;grid-row:auto;text-align:left}
+  main > section#team .person:nth-child(2) h3,
+  main > section#team .person:nth-child(2) .person-role,
+  main > section#team .person:nth-child(2) p,
+  main > section#team .person:nth-child(2) .person-tags,
+  main > section#team .person:nth-child(2) .person-link{grid-column:2;grid-row:auto;text-align:left}
+  main > section#team .person:nth-child(2) p{margin-left:0}
+  main > section#team .person:nth-child(2) .person-tags{justify-content:flex-start}
+  main > section#team .person:nth-child(2) .person-link{margin-left:0}
+}
+@media(max-width:430px){
+  main > section#team .person:nth-child(2) .person-photo-wrap{grid-column:1/3}
+  main > section#team .person:nth-child(2) .person-no{grid-column:1}
+  main > section#team .person:nth-child(2) h3,
+  main > section#team .person:nth-child(2) .person-role,
+  main > section#team .person:nth-child(2) p,
+  main > section#team .person:nth-child(2) .person-tags,
+  main > section#team .person:nth-child(2) .person-link{grid-column:2}
+}
+
 /* Capability icon and control refinement */
 .btn{gap:10px;min-height:50px;padding:0 14px 0 18px;border-radius:14px}
 .btn-icon{width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.12);transition:transform .18s ease,background .18s ease}
