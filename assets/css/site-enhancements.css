@@ -238,3 +238,81 @@ html.js .reveal.visible{opacity:1;transform:none}
 main > section:not(.hero){padding:92px 0}
 main > section:not(.hero) + section{border-top-color:rgba(17,20,23,.12)}
 main > section#what{padding-top:104px;padding-bottom:88px;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0))}
+main > section.soft-section{padding-top:88px;padding-bottom:88px;background:linear-gradient(180deg,rgba(235,231,222,.9),rgba(235,231,222,.52))}
+main > section#focus{padding-top:98px;padding-bottom:98px}
+main > section#intelligence{padding-top:86px;padding-bottom:86px}
+main > section#team{padding-top:92px;padding-bottom:92px}
+main > section#contact{padding-top:108px;padding-bottom:108px}
+
+@media(max-width:900px){
+  main > section:not(.hero){padding:82px 0}
+  main > section#what{padding-top:90px;padding-bottom:78px}
+  main > section.soft-section{padding-top:78px;padding-bottom:78px}
+  main > section#focus{padding-top:86px;padding-bottom:86px}
+  main > section#intelligence{padding-top:76px;padding-bottom:76px}
+  main > section#team{padding-top:82px;padding-bottom:82px}
+  main > section#contact{padding-top:96px;padding-bottom:96px}
+}
+
+@media(max-width:650px){
+  main > section:not(.hero){padding:72px 0}
+  main > section#what{padding-top:78px;padding-bottom:68px}
+  main > section.soft-section{padding-top:70px;padding-bottom:70px}
+  main > section#focus{padding-top:74px;padding-bottom:74px}
+  main > section#intelligence{padding-top:68px;padding-bottom:68px}
+  main > section#team{padding-top:72px;padding-bottom:72px}
+  main > section#contact{padding-top:88px;padding-bottom:88px}
+}
+
+/* Intelligence: turn the featured brief into an editorial cover spread. */
+main > section#intelligence{background:#ebe7de}
+main > section#intelligence .section-note{max-width:380px}
+main > section#intelligence .insight-card{grid-template-columns:minmax(260px,.72fr) minmax(0,1fr) auto;align-items:stretch;padding:14px;gap:28px;background:#1c1c1c;border-color:#1c1c1c;border-radius:28px;color:#f4f1ea;overflow:hidden;box-shadow:0 18px 38px rgba(17,20,23,.08)}
+main > section#intelligence .insight-card-media{position:relative;min-height:300px;border-radius:20px;background:#111418}
+main > section#intelligence .insight-card-media:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,20,23,.08) 38%,rgba(17,20,23,.68) 100%);pointer-events:none}
+main > section#intelligence .insight-card-index{position:absolute;z-index:1;top:16px;left:17px;font-size:11px;letter-spacing:.14em;color:#f4f1ea}
+main > section#intelligence .insight-card-media-label{position:absolute;z-index:1;right:17px;bottom:16px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#d8a45d}
+main > section#intelligence .insight-card-copy{align-self:center;padding:16px 0}
+main > section#intelligence .insight-card-copy .section-kicker{color:#d8a45d}
+main > section#intelligence .insight-card h3{font-size:clamp(34px,3.7vw,56px);line-height:.98;margin:10px 0 16px;max-width:620px;color:#f4f1ea}
+main > section#intelligence .insight-card p{color:#cdd1cf;max-width:620px}
+main > section#intelligence .insight-card-topics{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:30px;padding-top:17px;border-top:1px solid rgba(255,255,255,.15);max-width:620px}
+main > section#intelligence .insight-card-topics span{font-size:11px;line-height:1.4;color:#aeb4b1}
+main > section#intelligence .insight-badge{align-self:end;margin:12px 8px 12px 0;border-color:rgba(255,255,255,.2);color:#f4f1ea}
+main > section#intelligence .insight-link:hover{box-shadow:0 22px 44px rgba(17,20,23,.14)}
+main > section#intelligence .insight-link:focus-visible{outline-color:#d8a45d}
+@media(max-width:900px){
+  main > section#intelligence .insight-card{grid-template-columns:minmax(170px,.7fr) minmax(0,1fr);gap:20px}
+  main > section#intelligence .insight-card-media{min-height:220px}
+  main > section#intelligence .insight-badge{grid-column:2;justify-self:start;margin:0 0 6px}
+}
+@media(max-width:650px){
+  main > section#intelligence .insight-card{grid-template-columns:1fr;padding:10px;border-radius:22px;gap:0}
+  main > section#intelligence .insight-card-media{min-height:0;aspect-ratio:16/10;border-radius:16px}
+  main > section#intelligence .insight-card-copy{padding:24px 8px 12px}
+  main > section#intelligence .insight-card h3{font-size:clamp(34px,10vw,47px)}
+  main > section#intelligence .insight-card-topics{margin-top:24px}
+  main > section#intelligence .insight-badge{grid-column:auto;margin:0 8px 8px;justify-self:start}
+}
+
+/* Capability icon and control refinement */
+.btn{gap:10px;min-height:50px;padding:0 14px 0 18px;border-radius:14px}
+.btn-icon{width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.12);transition:transform .18s ease,background .18s ease}
+.btn-icon svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+.btn.ghost .btn-icon{background:rgba(17,20,23,.065)}
+.btn:hover .btn-icon{transform:translateX(2px)}
+.contact .btn-icon{background:rgba(236,232,223,.12)}
+.contact .company-link .btn-icon{background:rgba(236,232,223,.08)}
+.cap{position:relative;overflow:hidden}
+.cap-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.cap-visual{width:56px;height:56px;display:grid;place-items:center;border:1px solid rgba(100,113,104,.38);border-radius:17px;background:linear-gradient(145deg,rgba(220,226,220,.72),rgba(248,246,241,.78));color:var(--sage)}
+.cap-icon{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
+.cap .section-kicker{margin-top:7px;margin-bottom:0}
+.cap h3{margin-top:22px}
+.cap.full .cap-head{align-items:flex-start}
+.cap.full .cap-visual{background:linear-gradient(145deg,rgba(216,224,217,.88),rgba(248,246,241,.78))}
+@media(max-width:650px){
+  .btn{min-height:48px}
+  .cap-visual{width:52px;height:52px;border-radius:15px}
+  .cap-icon{width:31px;height:31px}
+}
